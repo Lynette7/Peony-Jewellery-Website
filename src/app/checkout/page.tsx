@@ -9,6 +9,7 @@ import { formatPrice } from '@/data/products';
 import Button from '@/components/ui/Button';
 import MpesaPayment from '@/components/checkout/MpesaPayment';
 import CardPayment from '@/components/checkout/CardPayment';
+import { createOrder } from '@/lib/actions';
 
 type PaymentMethod = 'mpesa' | 'card';
 type CheckoutStep = 'info' | 'payment' | 'confirmation';
@@ -37,7 +38,28 @@ export default function CheckoutPage() {
     setStep('payment');
   };
 
-  const handlePaymentSuccess = () => {
+  const handlePaymentSuccess = async () => {
+    // Create order in database
+    const orderItems = items.map((item) => ({
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      image: item.product.image,
+    }));
+
+    await createOrder({
+      customer_name: `${formData.firstName} ${formData.lastName}`,
+      customer_email: formData.email,
+      customer_phone: formData.phone,
+      address: formData.address,
+      city: formData.city,
+      postal_code: formData.postalCode,
+      total: getCartTotal(),
+      items: orderItems,
+      payment_method: paymentMethod,
+    });
+
     clearCart();
     setStep('confirmation');
   };
@@ -82,19 +104,22 @@ export default function CheckoutPage() {
 
   return (
     <div className="min-h-screen bg-background">
+      {/* Header */}
+      <div className="bg-muted/30 py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Back Button */}
+          <Link
+            href="/cart"
+            className="inline-flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors mb-4"
+          >
+            <ArrowLeft size={20} />
+            <span>Back to Cart</span>
+          </Link>
+          <h1 className="text-3xl font-bold text-foreground">Checkout</h1>
+        </div>
+      </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Back Button */}
-        <Link
-          href="/cart"
-          className="inline-flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors mb-8"
-        >
-          <ArrowLeft size={20} />
-          <span>Back to Cart</span>
-        </Link>
-
-        {/* Header */}
-        <h1 className="text-3xl font-bold text-foreground mb-8">Checkout</h1>
-
         {/* Progress Steps */}
         <div className="flex items-center justify-center mb-12">
           <div className="flex items-center space-x-4">

@@ -29,6 +29,7 @@ const WhatsAppIcon = ({ size = 20 }: { size?: number }) => (
   </svg>
 );
 import Button from '@/components/ui/Button';
+import { createContactMessage } from '@/lib/actions';
 
 export default function ContactPage() {
   const [formData, setFormData] = useState({
@@ -50,8 +51,14 @@ export default function ContactPage() {
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Simulate form submission
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    // Save message to database
+    await createContactMessage({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone || null,
+      subject: formData.subject,
+      message: formData.message,
+    });
 
     setIsSubmitting(false);
     setIsSubmitted(true);

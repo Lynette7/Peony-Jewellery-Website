@@ -36,16 +36,20 @@ export default function ProductDetail({ product }: ProductDetailProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Back Button */}
-        <Link
-          href="/shop"
-          className="inline-flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors mb-8"
-        >
-          <ArrowLeft size={20} />
-          <span>Back to Shop</span>
-        </Link>
+      {/* Header */}
+      <div className="bg-muted/30 py-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link
+            href="/shop"
+            className="inline-flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors"
+          >
+            <ArrowLeft size={20} />
+            <span>Back to Shop</span>
+          </Link>
+        </div>
+      </div>
 
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Product Details */}
         <div className="grid lg:grid-cols-2 gap-12">
           {/* Image Section */}

@@ -1,4 +1,4 @@
-import { Product, CategoryInfo } from '@/types';
+import { Product, CategoryInfo, Category } from '@/types';
 
 export const categories: CategoryInfo[] = [
   {
@@ -27,7 +27,8 @@ export const categories: CategoryInfo[] = [
   },
 ];
 
-export const products: Product[] = [
+// Static fallback products (used when Supabase is not configured)
+export const staticProducts: Product[] = [
   // Earrings
   {
     id: 'ear-001',
@@ -217,18 +218,41 @@ export const products: Product[] = [
   },
 ];
 
+// Export products - this can be used as a fallback
+export const products = staticProducts;
+
 export const getFeaturedProducts = (): Product[] => {
-  return products.filter(product => product.featured);
+  return staticProducts.filter(product => product.featured);
 };
 
 export const getProductsByCategory = (category: string): Product[] => {
-  return products.filter(product => product.category === category);
+  return staticProducts.filter(product => product.category === category);
 };
 
 export const getProductById = (id: string): Product | undefined => {
-  return products.find(product => product.id === id);
+  return staticProducts.find(product => product.id === id);
 };
 
 export const formatPrice = (price: number): string => {
   return `KES ${price.toLocaleString()}`;
 };
+
+// Convert Supabase product to frontend Product type
+export const mapSupabaseProduct = (dbProduct: {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  category: string;
+  image: string;
+  in_stock: boolean;
+  created_at: string;
+}): Product => ({
+  id: dbProduct.id,
+  name: dbProduct.name,
+  description: dbProduct.description,
+  price: dbProduct.price,
+  category: dbProduct.category as Category,
+  image: dbProduct.image,
+  inStock: dbProduct.in_stock,
+});
