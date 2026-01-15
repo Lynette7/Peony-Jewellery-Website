@@ -66,7 +66,7 @@ export default function AdminOrdersPage() {
     try {
       const { error } = await supabase
         .from('orders')
-        .update({ status: newStatus })
+        .update({ status: newStatus } as { status: string })
         .eq('id', orderId);
 
       if (error) throw error;

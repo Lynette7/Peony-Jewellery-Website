@@ -84,7 +84,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     try {
       const { error } = await supabase
         .from('products')
-        .update(formData)
+        .update(formData as ProductUpdate)
         .eq('id', id);
 
       if (error) throw error;

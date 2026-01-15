@@ -45,7 +45,7 @@ export default function NewProductPage() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.from('products').insert([formData]);
+      const { error } = await supabase.from('products').insert([formData as ProductInsert]);
 
       if (error) throw error;
 

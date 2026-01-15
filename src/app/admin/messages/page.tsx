@@ -62,7 +62,7 @@ export default function AdminMessagesPage() {
     try {
       const { error } = await supabase
         .from('contact_messages')
-        .update({ read })
+        .update({ read } as { read: boolean })
         .eq('id', id);
 
       if (error) throw error;
