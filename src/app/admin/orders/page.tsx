@@ -6,11 +6,11 @@ import { createClient } from '@/lib/supabase/client';
 import { Order } from '@/types/database';
 
 const statusOptions = [
-  { value: 'pending', label: 'Pending', color: 'bg-yellow-100 text-yellow-800' },
-  { value: 'processing', label: 'Processing', color: 'bg-blue-100 text-blue-800' },
-  { value: 'shipped', label: 'Shipped', color: 'bg-purple-100 text-purple-800' },
-  { value: 'delivered', label: 'Delivered', color: 'bg-green-100 text-green-800' },
-  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-100 text-red-800' },
+  { value: 'pending', label: 'Pending', color: 'bg-yellow-900/50 text-yellow-300' },
+  { value: 'processing', label: 'Processing', color: 'bg-blue-900/50 text-blue-300' },
+  { value: 'shipped', label: 'Shipped', color: 'bg-purple-900/50 text-purple-300' },
+  { value: 'delivered', label: 'Delivered', color: 'bg-green-900/50 text-green-300' },
+  { value: 'cancelled', label: 'Cancelled', color: 'bg-red-900/50 text-red-300' },
 ];
 
 export default function AdminOrdersPage() {
@@ -110,7 +110,7 @@ export default function AdminOrdersPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#82001a]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f8dae2]"></div>
       </div>
     );
   }
@@ -119,27 +119,27 @@ export default function AdminOrdersPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Orders</h1>
-        <p className="text-gray-600">Manage and track customer orders</p>
+        <h1 className="text-2xl font-bold text-[#fcfbf9]">Orders</h1>
+        <p className="text-[#f8dae2]">Manage and track customer orders</p>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="bg-[#5a002d] rounded-xl shadow-sm border border-[#920b4c] p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#f8dae2]" size={20} />
             <input
               type="text"
               placeholder="Search by name, email, or order ID..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+            className="px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9]"
           >
             <option value="all">All Status</option>
             {statusOptions.map((status) => (
@@ -152,12 +152,12 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Orders Table */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-[#5a002d] rounded-xl shadow-sm border border-[#920b4c] overflow-hidden">
         {filteredOrders.length === 0 ? (
           <div className="p-12 text-center">
-            <ShoppingCart className="mx-auto mb-4 text-gray-400" size={48} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No orders found</h3>
-            <p className="text-gray-600">
+            <ShoppingCart className="mx-auto mb-4 text-[#920b4c]" size={48} />
+            <h3 className="text-lg font-medium text-[#fcfbf9] mb-2">No orders found</h3>
+            <p className="text-[#f8dae2]">
               {orders.length === 0
                 ? 'Orders will appear here once customers start checking out.'
                 : 'Try adjusting your search or filter.'}
@@ -166,48 +166,48 @@ export default function AdminOrdersPage() {
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
+              <thead className="bg-[#4d0025] border-b border-[#920b4c]">
                 <tr>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-[#f8dae2] uppercase tracking-wider">
                     Order
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-[#f8dae2] uppercase tracking-wider">
                     Customer
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-[#f8dae2] uppercase tracking-wider">
                     Date
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-[#f8dae2] uppercase tracking-wider">
                     Total
                   </th>
-                  <th className="text-left px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-left px-6 py-3 text-xs font-medium text-[#f8dae2] uppercase tracking-wider">
                     Status
                   </th>
-                  <th className="text-right px-6 py-3 text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="text-right px-6 py-3 text-xs font-medium text-[#f8dae2] uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-[#920b4c]">
                 {filteredOrders.map((order) => (
-                  <tr key={order.id} className="hover:bg-gray-50">
+                  <tr key={order.id} className="hover:bg-[#920b4c]/20">
                     <td className="px-6 py-4">
-                      <p className="font-mono text-sm text-gray-900">
+                      <p className="font-mono text-sm text-[#fcfbf9]">
                         #{order.id.slice(0, 8)}
                       </p>
-                      <p className="text-xs text-gray-500 capitalize">
+                      <p className="text-xs text-[#f8dae2] capitalize">
                         {order.payment_method}
                       </p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">{order.customer_name}</p>
-                      <p className="text-sm text-gray-500">{order.customer_email}</p>
+                      <p className="font-medium text-[#fcfbf9]">{order.customer_name}</p>
+                      <p className="text-sm text-[#f8dae2]">{order.customer_email}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="text-sm text-gray-700">{formatDate(order.created_at)}</p>
+                      <p className="text-sm text-[#f8dae2]">{formatDate(order.created_at)}</p>
                     </td>
                     <td className="px-6 py-4">
-                      <p className="font-medium text-gray-900">{formatPrice(order.total)}</p>
+                      <p className="font-medium text-[#fcfbf9]">{formatPrice(order.total)}</p>
                     </td>
                     <td className="px-6 py-4">
                       <select
@@ -228,7 +228,7 @@ export default function AdminOrdersPage() {
                       <div className="flex items-center justify-end">
                         <button
                           onClick={() => setSelectedOrder(order)}
-                          className="p-2 text-gray-500 hover:text-[#82001a] hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2 text-[#f8dae2] hover:text-[#fcfbf9] hover:bg-[#920b4c]/50 rounded-lg transition-colors"
                         >
                           <Eye size={18} />
                         </button>
@@ -243,24 +243,24 @@ export default function AdminOrdersPage() {
       </div>
 
       {/* Stats */}
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-[#f8dae2]">
         Showing {filteredOrders.length} of {orders.length} orders
       </div>
 
       {/* Order Detail Modal */}
       {selectedOrder && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-center justify-between">
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#5a002d] rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#920b4c]">
+            <div className="p-6 border-b border-[#920b4c] flex items-center justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">
+                <h2 className="text-xl font-bold text-[#fcfbf9]">
                   Order #{selectedOrder.id.slice(0, 8)}
                 </h2>
-                <p className="text-sm text-gray-500">{formatDate(selectedOrder.created_at)}</p>
+                <p className="text-sm text-[#f8dae2]">{formatDate(selectedOrder.created_at)}</p>
               </div>
               <button
                 onClick={() => setSelectedOrder(null)}
-                className="p-2 hover:bg-gray-100 rounded-lg"
+                className="p-2 hover:bg-[#920b4c]/50 rounded-lg text-[#f8dae2]"
               >
                 <X size={20} />
               </button>
@@ -269,7 +269,7 @@ export default function AdminOrdersPage() {
             <div className="p-6 space-y-6">
               {/* Status */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Status</h3>
+                <h3 className="text-sm font-medium text-[#f8dae2] mb-2">Status</h3>
                 <select
                   value={selectedOrder.status}
                   onChange={(e) => updateOrderStatus(selectedOrder.id, e.target.value)}
@@ -287,20 +287,20 @@ export default function AdminOrdersPage() {
 
               {/* Customer Info */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Customer</h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p className="font-medium text-gray-900">{selectedOrder.customer_name}</p>
-                  <p className="text-sm text-gray-600">{selectedOrder.customer_email}</p>
-                  <p className="text-sm text-gray-600">{selectedOrder.customer_phone}</p>
+                <h3 className="text-sm font-medium text-[#f8dae2] mb-2">Customer</h3>
+                <div className="bg-[#4d0025] rounded-lg p-4 space-y-2">
+                  <p className="font-medium text-[#fcfbf9]">{selectedOrder.customer_name}</p>
+                  <p className="text-sm text-[#f8dae2]">{selectedOrder.customer_email}</p>
+                  <p className="text-sm text-[#f8dae2]">{selectedOrder.customer_phone}</p>
                 </div>
               </div>
 
               {/* Shipping Address */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Shipping Address</h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-700">{selectedOrder.address}</p>
-                  <p className="text-gray-700">
+                <h3 className="text-sm font-medium text-[#f8dae2] mb-2">Shipping Address</h3>
+                <div className="bg-[#4d0025] rounded-lg p-4">
+                  <p className="text-[#f8dae2]">{selectedOrder.address}</p>
+                  <p className="text-[#f8dae2]">
                     {selectedOrder.city}, {selectedOrder.postal_code}
                   </p>
                 </div>
@@ -308,8 +308,8 @@ export default function AdminOrdersPage() {
 
               {/* Order Items */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Items</h3>
-                <div className="bg-gray-50 rounded-lg divide-y divide-gray-200">
+                <h3 className="text-sm font-medium text-[#f8dae2] mb-2">Items</h3>
+                <div className="bg-[#4d0025] rounded-lg divide-y divide-[#920b4c]">
                   {Array.isArray(selectedOrder.items) &&
                     (selectedOrder.items as Array<{
                       name: string;
@@ -318,10 +318,10 @@ export default function AdminOrdersPage() {
                     }>).map((item, index) => (
                       <div key={index} className="p-4 flex justify-between">
                         <div>
-                          <p className="font-medium text-gray-900">{item.name}</p>
-                          <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                          <p className="font-medium text-[#fcfbf9]">{item.name}</p>
+                          <p className="text-sm text-[#f8dae2]">Qty: {item.quantity}</p>
                         </div>
-                        <p className="font-medium text-gray-900">
+                        <p className="font-medium text-[#fcfbf9]">
                           {formatPrice(item.price * item.quantity)}
                         </p>
                       </div>
@@ -330,16 +330,16 @@ export default function AdminOrdersPage() {
               </div>
 
               {/* Payment */}
-              <div className="flex justify-between items-center pt-4 border-t border-gray-200">
+              <div className="flex justify-between items-center pt-4 border-t border-[#920b4c]">
                 <div>
-                  <p className="text-sm text-gray-500">Payment Method</p>
-                  <p className="font-medium text-gray-900 capitalize">
+                  <p className="text-sm text-[#f8dae2]">Payment Method</p>
+                  <p className="font-medium text-[#fcfbf9] capitalize">
                     {selectedOrder.payment_method}
                   </p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm text-gray-500">Total</p>
-                  <p className="text-xl font-bold text-[#82001a]">
+                  <p className="text-sm text-[#f8dae2]">Total</p>
+                  <p className="text-xl font-bold text-[#f8dae2]">
                     {formatPrice(selectedOrder.total)}
                   </p>
                 </div>

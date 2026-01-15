@@ -64,19 +64,19 @@ export default function NewProductPage() {
       <div className="mb-6">
         <Link
           href="/admin/products"
-          className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-4"
+          className="inline-flex items-center text-[#f8dae2] hover:text-[#fcfbf9] mb-4"
         >
           <ArrowLeft size={20} className="mr-2" />
           Back to Products
         </Link>
-        <h1 className="text-2xl font-bold text-gray-900">Add New Product</h1>
-        <p className="text-gray-600">Fill in the details below to add a new product.</p>
+        <h1 className="text-2xl font-bold text-[#fcfbf9]">Add New Product</h1>
+        <p className="text-[#f8dae2]">Fill in the details below to add a new product.</p>
       </div>
 
       {/* Form */}
-      <form onSubmit={handleSubmit} className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <form onSubmit={handleSubmit} className="bg-[#5a002d] rounded-xl shadow-sm border border-[#920b4c] p-6">
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <div className="mb-6 p-4 bg-red-900/30 border border-red-700 rounded-lg text-red-300">
             {error}
           </div>
         )}
@@ -84,7 +84,7 @@ export default function NewProductPage() {
         <div className="space-y-6">
           {/* Name */}
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-[#f8dae2] mb-1">
               Product Name *
             </label>
             <input
@@ -94,14 +94,14 @@ export default function NewProductPage() {
               value={formData.name}
               onChange={handleInputChange}
               required
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+              className="w-full px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50"
               placeholder="e.g., Pearl Drop Earrings"
             />
           </div>
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="description" className="block text-sm font-medium text-[#f8dae2] mb-1">
               Description *
             </label>
             <textarea
@@ -111,7 +111,7 @@ export default function NewProductPage() {
               onChange={handleInputChange}
               required
               rows={4}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent resize-none"
+              className="w-full px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent resize-none text-[#fcfbf9] placeholder-[#f8dae2]/50"
               placeholder="Describe the product..."
             />
           </div>
@@ -119,7 +119,7 @@ export default function NewProductPage() {
           {/* Price & Category */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
-              <label htmlFor="price" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="price" className="block text-sm font-medium text-[#f8dae2] mb-1">
                 Price (KES) *
               </label>
               <input
@@ -130,12 +130,12 @@ export default function NewProductPage() {
                 onChange={handleInputChange}
                 required
                 min="0"
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+                className="w-full px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9]"
                 placeholder="0"
               />
             </div>
             <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="category" className="block text-sm font-medium text-[#f8dae2] mb-1">
                 Category *
               </label>
               <select
@@ -144,7 +144,7 @@ export default function NewProductPage() {
                 value={formData.category}
                 onChange={handleInputChange}
                 required
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+                className="w-full px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9]"
               >
                 <option value="earrings">Earrings</option>
                 <option value="necklaces">Necklaces</option>
@@ -156,7 +156,7 @@ export default function NewProductPage() {
 
           {/* Image URL */}
           <div>
-            <label htmlFor="image" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="image" className="block text-sm font-medium text-[#f8dae2] mb-1">
               Image URL *
             </label>
             <div className="flex gap-4">
@@ -167,11 +167,11 @@ export default function NewProductPage() {
                 value={formData.image}
                 onChange={handleInputChange}
                 required
-                className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+                className="flex-1 px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50"
                 placeholder="https://example.com/image.jpg"
               />
               {formData.image && (
-                <div className="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 flex-shrink-0 border border-gray-200">
+                <div className="w-16 h-16 rounded-lg overflow-hidden bg-[#4d0025] flex-shrink-0 border border-[#920b4c]">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={formData.image}
@@ -184,7 +184,7 @@ export default function NewProductPage() {
                 </div>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-[#f8dae2]/70 mt-1">
               Use a direct link to an image. Tip: Use Unsplash for free stock photos.
             </p>
           </div>
@@ -197,26 +197,26 @@ export default function NewProductPage() {
               name="in_stock"
               checked={formData.in_stock}
               onChange={handleCheckboxChange}
-              className="w-4 h-4 text-[#82001a] border-gray-300 rounded focus:ring-[#82001a]"
+              className="w-4 h-4 text-[#920b4c] bg-[#4d0025] border-[#920b4c] rounded focus:ring-[#f8dae2]"
             />
-            <label htmlFor="in_stock" className="ml-2 text-sm font-medium text-gray-700">
+            <label htmlFor="in_stock" className="ml-2 text-sm font-medium text-[#f8dae2]">
               In Stock
             </label>
           </div>
         </div>
 
         {/* Actions */}
-        <div className="mt-8 pt-6 border-t border-gray-200 flex justify-end space-x-4">
+        <div className="mt-8 pt-6 border-t border-[#920b4c] flex justify-end space-x-4">
           <Link
             href="/admin/products"
-            className="px-4 py-2 text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+            className="px-4 py-2 text-[#f8dae2] bg-[#4d0025] hover:bg-[#920b4c]/50 rounded-lg transition-colors"
           >
             Cancel
           </Link>
           <button
             type="submit"
             disabled={isLoading}
-            className="flex items-center space-x-2 px-4 py-2 bg-[#82001a] text-white rounded-lg hover:bg-[#6b0016] transition-colors disabled:opacity-50"
+            className="flex items-center space-x-2 px-4 py-2 bg-[#920b4c] text-[#fcfbf9] rounded-lg hover:bg-[#a80d58] transition-colors disabled:opacity-50"
           >
             {isLoading ? (
               <>

@@ -21,6 +21,11 @@ export const metadata: Metadata = {
   title: "Peony HQ Kenya | Elegant Jewellery",
   description: "Discover beautiful, handcrafted jewellery at Peony HQ Kenya. Shop our collection of earrings, necklaces, rings, and bracelets.",
   keywords: ["jewellery", "Kenya", "earrings", "necklaces", "rings", "bracelets", "Peony HQ"],
+  icons: {
+    icon: "/peony-tab.svg",
+    shortcut: "/peony-tab.svg",
+    apple: "/peony-tab.svg",
+  },
 };
 
 export default function RootLayout({

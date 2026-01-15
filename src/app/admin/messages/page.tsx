@@ -121,7 +121,7 @@ export default function AdminMessagesPage() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#82001a]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#f8dae2]"></div>
       </div>
     );
   }
@@ -130,11 +130,11 @@ export default function AdminMessagesPage() {
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Messages</h1>
-        <p className="text-gray-600">
+        <h1 className="text-2xl font-bold text-[#fcfbf9]">Messages</h1>
+        <p className="text-[#f8dae2]">
           View and manage contact form submissions
           {unreadCount > 0 && (
-            <span className="ml-2 px-2 py-1 bg-[#82001a] text-white text-xs rounded-full">
+            <span className="ml-2 px-2 py-1 bg-[#920b4c] text-[#fcfbf9] text-xs rounded-full">
               {unreadCount} unread
             </span>
           )}
@@ -142,22 +142,22 @@ export default function AdminMessagesPage() {
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-4">
+      <div className="bg-[#5a002d] rounded-xl shadow-sm border border-[#920b4c] p-4">
         <div className="flex flex-col sm:flex-row gap-4">
           <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[#f8dae2]" size={20} />
             <input
               type="text"
               placeholder="Search messages..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+              className="w-full pl-10 pr-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50"
             />
           </div>
           <select
             value={readFilter}
             onChange={(e) => setReadFilter(e.target.value)}
-            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#82001a] focus:border-transparent"
+            className="px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9]"
           >
             <option value="all">All Messages</option>
             <option value="unread">Unread</option>
@@ -167,24 +167,24 @@ export default function AdminMessagesPage() {
       </div>
 
       {/* Messages List */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-[#5a002d] rounded-xl shadow-sm border border-[#920b4c] overflow-hidden">
         {filteredMessages.length === 0 ? (
           <div className="p-12 text-center">
-            <MessageSquare className="mx-auto mb-4 text-gray-400" size={48} />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">No messages found</h3>
-            <p className="text-gray-600">
+            <MessageSquare className="mx-auto mb-4 text-[#920b4c]" size={48} />
+            <h3 className="text-lg font-medium text-[#fcfbf9] mb-2">No messages found</h3>
+            <p className="text-[#f8dae2]">
               {messages.length === 0
                 ? 'Messages from your contact form will appear here.'
                 : 'Try adjusting your search or filter.'}
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-gray-200">
+          <div className="divide-y divide-[#920b4c]">
             {filteredMessages.map((message) => (
               <div
                 key={message.id}
-                className={`p-4 hover:bg-gray-50 cursor-pointer transition-colors ${
-                  !message.read ? 'bg-[#f8dae2]/20' : ''
+                className={`p-4 hover:bg-[#920b4c]/20 cursor-pointer transition-colors ${
+                  !message.read ? 'bg-[#920b4c]/30' : ''
                 }`}
                 onClick={() => openMessage(message)}
               >
@@ -192,21 +192,21 @@ export default function AdminMessagesPage() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2 mb-1">
                       {!message.read && (
-                        <span className="w-2 h-2 bg-[#82001a] rounded-full flex-shrink-0"></span>
+                        <span className="w-2 h-2 bg-[#f8dae2] rounded-full flex-shrink-0"></span>
                       )}
-                      <p className={`font-medium truncate ${!message.read ? 'text-gray-900' : 'text-gray-700'}`}>
+                      <p className={`font-medium truncate ${!message.read ? 'text-[#fcfbf9]' : 'text-[#f8dae2]'}`}>
                         {message.name}
                       </p>
-                      <span className="text-gray-400">•</span>
-                      <p className="text-sm text-gray-500 truncate">{message.email}</p>
+                      <span className="text-[#920b4c]">•</span>
+                      <p className="text-sm text-[#f8dae2] truncate">{message.email}</p>
                     </div>
-                    <p className={`font-medium mb-1 ${!message.read ? 'text-gray-900' : 'text-gray-600'}`}>
+                    <p className={`font-medium mb-1 ${!message.read ? 'text-[#fcfbf9]' : 'text-[#f8dae2]'}`}>
                       {message.subject}
                     </p>
-                    <p className="text-sm text-gray-500 line-clamp-2">{message.message}</p>
+                    <p className="text-sm text-[#f8dae2]/70 line-clamp-2">{message.message}</p>
                   </div>
                   <div className="flex flex-col items-end space-y-2 flex-shrink-0">
-                    <p className="text-xs text-gray-500">{formatDate(message.created_at)}</p>
+                    <p className="text-xs text-[#f8dae2]/70">{formatDate(message.created_at)}</p>
                     <div className="flex items-center space-x-1">
                       {deleteConfirm === message.id ? (
                         <>
@@ -224,7 +224,7 @@ export default function AdminMessagesPage() {
                               e.stopPropagation();
                               setDeleteConfirm(null);
                             }}
-                            className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded hover:bg-gray-300"
+                            className="px-2 py-1 text-xs bg-[#920b4c] text-[#fcfbf9] rounded hover:bg-[#a80d58]"
                           >
                             Cancel
                           </button>
@@ -235,7 +235,7 @@ export default function AdminMessagesPage() {
                             e.stopPropagation();
                             setDeleteConfirm(message.id);
                           }}
-                          className="p-1 text-gray-400 hover:text-red-600 rounded transition-colors"
+                          className="p-1 text-[#f8dae2] hover:text-red-400 rounded transition-colors"
                         >
                           <Trash2 size={16} />
                         </button>
@@ -250,18 +250,18 @@ export default function AdminMessagesPage() {
       </div>
 
       {/* Stats */}
-      <div className="text-sm text-gray-500">
+      <div className="text-sm text-[#f8dae2]">
         Showing {filteredMessages.length} of {messages.length} messages
       </div>
 
       {/* Message Detail Modal */}
       {selectedMessage && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-            <div className="p-6 border-b border-gray-200 flex items-start justify-between">
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center p-4">
+          <div className="bg-[#5a002d] rounded-xl shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[#920b4c]">
+            <div className="p-6 border-b border-[#920b4c] flex items-start justify-between">
               <div>
-                <h2 className="text-xl font-bold text-gray-900">{selectedMessage.subject}</h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <h2 className="text-xl font-bold text-[#fcfbf9]">{selectedMessage.subject}</h2>
+                <p className="text-sm text-[#f8dae2] mt-1">
                   {formatDate(selectedMessage.created_at)}
                 </p>
               </div>
@@ -270,8 +270,8 @@ export default function AdminMessagesPage() {
                   onClick={() => markAsRead(selectedMessage.id, !selectedMessage.read)}
                   className={`p-2 rounded-lg transition-colors ${
                     selectedMessage.read
-                      ? 'text-gray-500 hover:bg-gray-100'
-                      : 'text-[#82001a] bg-[#f8dae2] hover:bg-[#f8dae2]/80'
+                      ? 'text-[#f8dae2] hover:bg-[#920b4c]/50'
+                      : 'text-[#fcfbf9] bg-[#920b4c] hover:bg-[#a80d58]'
                   }`}
                   title={selectedMessage.read ? 'Mark as unread' : 'Mark as read'}
                 >
@@ -279,7 +279,7 @@ export default function AdminMessagesPage() {
                 </button>
                 <button
                   onClick={() => setSelectedMessage(null)}
-                  className="p-2 hover:bg-gray-100 rounded-lg"
+                  className="p-2 hover:bg-[#920b4c]/50 rounded-lg text-[#f8dae2]"
                 >
                   <X size={20} />
                 </button>
@@ -288,17 +288,17 @@ export default function AdminMessagesPage() {
 
             <div className="p-6 space-y-6">
               {/* Sender Info */}
-              <div className="bg-gray-50 rounded-lg p-4">
+              <div className="bg-[#4d0025] rounded-lg p-4">
                 <div className="flex items-center space-x-3 mb-3">
-                  <div className="w-10 h-10 bg-[#82001a] rounded-full flex items-center justify-center text-white font-medium">
+                  <div className="w-10 h-10 bg-[#920b4c] rounded-full flex items-center justify-center text-[#fcfbf9] font-medium">
                     {selectedMessage.name.charAt(0).toUpperCase()}
                   </div>
                   <div>
-                    <p className="font-medium text-gray-900">{selectedMessage.name}</p>
-                    <div className="flex items-center space-x-4 text-sm text-gray-600">
+                    <p className="font-medium text-[#fcfbf9]">{selectedMessage.name}</p>
+                    <div className="flex items-center space-x-4 text-sm text-[#f8dae2]">
                       <a
                         href={`mailto:${selectedMessage.email}`}
-                        className="flex items-center hover:text-[#82001a]"
+                        className="flex items-center hover:text-[#fcfbf9]"
                       >
                         <Mail size={14} className="mr-1" />
                         {selectedMessage.email}
@@ -306,7 +306,7 @@ export default function AdminMessagesPage() {
                       {selectedMessage.phone && (
                         <a
                           href={`tel:${selectedMessage.phone}`}
-                          className="flex items-center hover:text-[#82001a]"
+                          className="flex items-center hover:text-[#fcfbf9]"
                         >
                           <Phone size={14} className="mr-1" />
                           {selectedMessage.phone}
@@ -319,17 +319,17 @@ export default function AdminMessagesPage() {
 
               {/* Message Content */}
               <div>
-                <h3 className="text-sm font-medium text-gray-500 mb-2">Message</h3>
-                <div className="bg-gray-50 rounded-lg p-4">
-                  <p className="text-gray-700 whitespace-pre-wrap">{selectedMessage.message}</p>
+                <h3 className="text-sm font-medium text-[#f8dae2] mb-2">Message</h3>
+                <div className="bg-[#4d0025] rounded-lg p-4">
+                  <p className="text-[#f8dae2] whitespace-pre-wrap">{selectedMessage.message}</p>
                 </div>
               </div>
 
               {/* Quick Actions */}
-              <div className="flex flex-wrap gap-3 pt-4 border-t border-gray-200">
+              <div className="flex flex-wrap gap-3 pt-4 border-t border-[#920b4c]">
                 <a
                   href={`mailto:${selectedMessage.email}?subject=Re: ${selectedMessage.subject}`}
-                  className="inline-flex items-center space-x-2 px-4 py-2 bg-[#82001a] text-white rounded-lg hover:bg-[#6b0016] transition-colors"
+                  className="inline-flex items-center space-x-2 px-4 py-2 bg-[#920b4c] text-[#fcfbf9] rounded-lg hover:bg-[#a80d58] transition-colors"
                 >
                   <Mail size={18} />
                   <span>Reply via Email</span>
@@ -339,7 +339,7 @@ export default function AdminMessagesPage() {
                     href={`https://wa.me/${selectedMessage.phone.replace(/\D/g, '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                    className="inline-flex items-center space-x-2 px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-colors"
                   >
                     <Phone size={18} />
                     <span>WhatsApp</span>

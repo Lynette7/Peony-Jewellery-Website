@@ -16,8 +16,8 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 const THEME_STORAGE_KEY = 'peony-theme';
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>('system');
-  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('light');
+  const [theme, setThemeState] = useState<Theme>('dark');
+  const [resolvedTheme, setResolvedTheme] = useState<'light' | 'dark'>('dark');
 
   // Get the system preference
   const getSystemTheme = useCallback((): 'light' | 'dark' => {
@@ -53,7 +53,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   // Initialize theme from localStorage - valid hydration pattern
   useEffect(() => {
     const storedTheme = localStorage.getItem(THEME_STORAGE_KEY) as Theme | null;
-    const initialTheme = storedTheme || 'system';
+    const initialTheme = storedTheme || 'dark';
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setThemeState(initialTheme);
     const resolved = resolveTheme(initialTheme);
