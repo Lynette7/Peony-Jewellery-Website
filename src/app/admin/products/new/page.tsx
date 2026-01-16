@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, Loader2, Plus, X, Star } from 'lucide-react';
+import { ArrowLeft, Save, Loader2, Plus, X, Star, Upload, Link as LinkIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { ProductInsert } from '@/types/database';
 import ImageUpload from '@/components/admin/ImageUpload';
@@ -23,6 +23,8 @@ export default function NewProductPage() {
     featured: false,
   });
   const [newImageUrl, setNewImageUrl] = useState('');
+  const [carouselUploadMode, setCarouselUploadMode] = useState<'upload' | 'url'>('upload');
+  const [isUploadingCarousel, setIsUploadingCarousel] = useState(false);
   const supabase = createClient();
 
   const handleInputChange = (
@@ -71,6 +73,42 @@ export default function NewProductPage() {
       ...prev,
       images: (prev.images || []).filter((_, i) => i !== index),
     }));
+  };
+
+  const handleCarouselFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setIsUploadingCarousel(true);
+    const uploadedUrls: string[] = [];
+
+    for (const file of Array.from(files)) {
+      if (!file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) continue;
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+      if (!uploadError) {
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(fileName);
+        uploadedUrls.push(publicUrl);
+      }
+    }
+
+    if (uploadedUrls.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        images: [...(prev.images || []), ...uploadedUrls],
+      }));
+    }
+
+    setIsUploadingCarousel(false);
+    e.target.value = '';
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -203,26 +241,84 @@ export default function NewProductPage() {
 
           {/* Additional Images */}
           <div>
-            <label className="block text-sm font-medium text-[#f8dae2] mb-1">
+            <label className="block text-sm font-medium text-[#f8dae2] mb-2">
               Additional Images (for carousel)
             </label>
-            <div className="flex gap-2 mb-2">
-              <input
-                type="url"
-                value={newImageUrl}
-                onChange={(e) => setNewImageUrl(e.target.value)}
-                className="flex-1 px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50"
-                placeholder="https://example.com/image2.jpg"
-              />
+            
+            {/* Mode Toggle */}
+            <div className="flex space-x-2 mb-3">
               <button
                 type="button"
-                onClick={addImageUrl}
-                disabled={!newImageUrl.trim()}
-                className="px-4 py-2 bg-[#920b4c] text-[#fcfbf9] rounded-lg hover:bg-[#a80d58] transition-colors disabled:opacity-50 flex items-center"
+                onClick={() => setCarouselUploadMode('upload')}
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  carouselUploadMode === 'upload'
+                    ? 'bg-[#920b4c] text-[#fcfbf9]'
+                    : 'bg-[#4d0025] text-[#f8dae2] hover:bg-[#920b4c]/50'
+                }`}
               >
-                <Plus size={20} />
+                <Upload size={16} />
+                <span>Upload</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setCarouselUploadMode('url')}
+                className={`flex items-center space-x-2 px-3 py-1.5 rounded-lg text-sm transition-colors ${
+                  carouselUploadMode === 'url'
+                    ? 'bg-[#920b4c] text-[#fcfbf9]'
+                    : 'bg-[#4d0025] text-[#f8dae2] hover:bg-[#920b4c]/50'
+                }`}
+              >
+                <LinkIcon size={16} />
+                <span>URL</span>
               </button>
             </div>
+
+            {carouselUploadMode === 'upload' ? (
+              <div>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleCarouselFileUpload}
+                  className="hidden"
+                  id="carousel-upload"
+                />
+                <label
+                  htmlFor="carousel-upload"
+                  className="flex items-center justify-center w-full h-24 rounded-lg border-2 border-dashed border-[#920b4c] bg-[#4d0025] hover:bg-[#920b4c]/20 cursor-pointer transition-colors"
+                >
+                  {isUploadingCarousel ? (
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="animate-spin text-[#f8dae2]" size={20} />
+                      <span className="text-sm text-[#f8dae2]">Uploading...</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <Upload className="text-[#f8dae2]" size={20} />
+                      <span className="text-sm text-[#f8dae2]">Click to upload multiple images</span>
+                    </div>
+                  )}
+                </label>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <input
+                  type="url"
+                  value={newImageUrl}
+                  onChange={(e) => setNewImageUrl(e.target.value)}
+                  className="flex-1 px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50"
+                  placeholder="https://example.com/image2.jpg"
+                />
+                <button
+                  type="button"
+                  onClick={addImageUrl}
+                  disabled={!newImageUrl.trim()}
+                  className="px-4 py-2 bg-[#920b4c] text-[#fcfbf9] rounded-lg hover:bg-[#a80d58] transition-colors disabled:opacity-50 flex items-center"
+                >
+                  <Plus size={20} />
+                </button>
+              </div>
+            )}
             
             {/* Image thumbnails */}
             {formData.images && formData.images.length > 0 && (
@@ -251,7 +347,7 @@ export default function NewProductPage() {
                 ))}
               </div>
             )}
-            <p className="text-xs text-[#f8dae2]/70 mt-1">
+            <p className="text-xs text-[#f8dae2]/70 mt-2">
               Add additional images for the product carousel. These will show after the main image.
             </p>
           </div>
