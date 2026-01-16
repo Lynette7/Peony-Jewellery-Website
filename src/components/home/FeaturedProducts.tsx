@@ -1,13 +1,11 @@
-'use client';
-
 import React from 'react';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import ProductCard from '@/components/ui/ProductCard';
-import { getFeaturedProducts } from '@/data/products';
+import { getFeaturedProducts } from '@/lib/products';
 
-export default function FeaturedProducts() {
-  const featuredProducts = getFeaturedProducts();
+export default async function FeaturedProducts() {
+  const featuredProducts = await getFeaturedProducts();
 
   return (
     <section className="py-20 bg-background">
@@ -32,11 +30,19 @@ export default function FeaturedProducts() {
         </div>
 
         {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {featuredProducts.map((product) => (
-            <ProductCard key={product.id} product={product} />
-          ))}
-        </div>
+        {featuredProducts.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {featuredProducts.map((product) => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              Featured products coming soon!
+            </p>
+          </div>
+        )}
       </div>
     </section>
   );

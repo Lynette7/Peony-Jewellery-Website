@@ -27,6 +27,7 @@ export default function CheckoutPage() {
     city: '',
     postalCode: '',
   });
+  const [orderError, setOrderError] = useState('');
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -39,6 +40,8 @@ export default function CheckoutPage() {
   };
 
   const handlePaymentSuccess = async () => {
+    setOrderError('');
+    
     // Create order in database
     const orderItems = items.map((item) => ({
       id: item.product.id,
@@ -48,7 +51,7 @@ export default function CheckoutPage() {
       image: item.product.image,
     }));
 
-    await createOrder({
+    const result = await createOrder({
       customer_name: `${formData.firstName} ${formData.lastName}`,
       customer_email: formData.email,
       customer_phone: formData.phone,
@@ -60,8 +63,13 @@ export default function CheckoutPage() {
       payment_method: paymentMethod,
     });
 
-    clearCart();
-    setStep('confirmation');
+    if (result.success) {
+      clearCart();
+      setStep('confirmation');
+    } else {
+      setOrderError(result.error || 'Failed to create order. Please try again.');
+      console.error('Order creation failed:', result.error);
+    }
   };
 
   // Redirect to cart if empty
@@ -268,6 +276,11 @@ export default function CheckoutPage() {
 
             {step === 'payment' && (
               <div className="space-y-6">
+                {orderError && (
+                  <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg text-red-700 dark:text-red-300">
+                    {orderError}
+                  </div>
+                )}
                 {/* Payment Method Selection */}
                 <div className="bg-card border border-border rounded-2xl p-6">
                   <h2 className="text-xl font-semibold text-foreground mb-6">Payment Method</h2>

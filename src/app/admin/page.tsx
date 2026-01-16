@@ -9,7 +9,8 @@ import {
   TrendingUp,
   ArrowRight,
   Clock,
-  AlertCircle
+  AlertCircle,
+  Mail
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { Order, ContactMessage } from '@/types/database';
@@ -20,6 +21,7 @@ interface DashboardStats {
   pendingOrders: number;
   unreadMessages: number;
   totalRevenue: number;
+  newsletterSubscribers: number;
 }
 
 export default function AdminDashboardPage() {
@@ -29,6 +31,7 @@ export default function AdminDashboardPage() {
     pendingOrders: 0,
     unreadMessages: 0,
     totalRevenue: 0,
+    newsletterSubscribers: 0,
   });
   const [recentOrders, setRecentOrders] = useState<Order[]>([]);
   const [recentMessages, setRecentMessages] = useState<ContactMessage[]>([]);
@@ -69,7 +72,13 @@ export default function AdminDashboardPage() {
         .order('created_at', { ascending: false })
         .limit(5);
 
-      if (productsError || ordersError || messagesError || recentMessagesError) {
+      // Fetch active newsletter subscribers count
+      const { count: subscribersCount, error: subscribersError } = await supabase
+        .from('newsletter_subscribers')
+        .select('*', { count: 'exact', head: true })
+        .eq('is_active', true);
+
+      if (productsError || ordersError || messagesError || recentMessagesError || subscribersError) {
         throw new Error('Failed to fetch dashboard data');
       }
 
@@ -82,6 +91,7 @@ export default function AdminDashboardPage() {
         pendingOrders,
         unreadMessages: unreadCount || 0,
         totalRevenue,
+        newsletterSubscribers: subscribersCount || 0,
       });
 
       setRecentOrders(orders?.slice(0, 5) || []);
@@ -168,7 +178,7 @@ export default function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
         <div className="bg-[#5a002d] rounded-xl shadow-sm p-6 border border-[#920b4c]">
           <div className="flex items-center justify-between">
             <div>
@@ -228,6 +238,22 @@ export default function AdminDashboardPage() {
               <TrendingUp className="text-[#f8dae2]" size={24} />
             </div>
           </div>
+        </div>
+
+        <div className="bg-[#5a002d] rounded-xl shadow-sm p-6 border border-[#920b4c]">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-[#f8dae2]">Newsletter</p>
+              <p className="text-2xl font-bold text-[#fcfbf9] mt-1">{stats.newsletterSubscribers}</p>
+              <p className="text-sm text-[#f8dae2] mt-1">subscribers</p>
+            </div>
+            <div className="p-3 bg-[#920b4c]/50 rounded-lg">
+              <Mail className="text-[#f8dae2]" size={24} />
+            </div>
+          </div>
+          <Link href="/admin/newsletter" className="text-sm text-[#f8dae2] hover:text-[#fcfbf9] mt-3 inline-flex items-center">
+            View all <ArrowRight size={14} className="ml-1" />
+          </Link>
         </div>
       </div>
 

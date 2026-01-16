@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductDetail from './ProductDetail';
-import { getProductById, products } from '@/data/products';
+import { getProductById, getProducts } from '@/lib/products';
 
 interface ProductPageProps {
   params: Promise<{
@@ -10,7 +10,8 @@ interface ProductPageProps {
 }
 
 // Generate static params for all products
-export function generateStaticParams() {
+export async function generateStaticParams() {
+  const products = await getProducts();
   return products.map((product) => ({
     id: product.id,
   }));
@@ -19,7 +20,7 @@ export function generateStaticParams() {
 // Generate metadata for each product
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
 
   if (!product) {
     return {
@@ -38,9 +39,12 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   };
 }
 
+// Revalidate every 60 seconds to get fresh data
+export const revalidate = 60;
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { id } = await params;
-  const product = getProductById(id);
+  const product = await getProductById(id);
 
   if (!product) {
     notFound();

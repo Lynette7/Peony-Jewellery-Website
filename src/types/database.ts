@@ -117,6 +117,26 @@ export type Database = {
           created_at?: string;
         };
       };
+      newsletter_subscribers: {
+        Row: {
+          id: string;
+          email: string;
+          subscribed_at: string;
+          is_active: boolean;
+        };
+        Insert: {
+          id?: string;
+          email: string;
+          subscribed_at?: string;
+          is_active?: boolean;
+        };
+        Update: {
+          id?: string;
+          email?: string;
+          subscribed_at?: string;
+          is_active?: boolean;
+        };
+      };
     };
     Views: {
       [_ in never]: never;
@@ -142,3 +162,7 @@ export type OrderUpdate = Database['public']['Tables']['orders']['Update'];
 export type ContactMessage = Database['public']['Tables']['contact_messages']['Row'];
 export type ContactMessageInsert = Database['public']['Tables']['contact_messages']['Insert'];
 export type ContactMessageUpdate = Database['public']['Tables']['contact_messages']['Update'];
+
+export type NewsletterSubscriber = Database['public']['Tables']['newsletter_subscribers']['Row'];
+export type NewsletterSubscriberInsert = Database['public']['Tables']['newsletter_subscribers']['Insert'];
+export type NewsletterSubscriberUpdate = Database['public']['Tables']['newsletter_subscribers']['Update'];

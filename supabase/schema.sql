@@ -64,28 +64,77 @@ CREATE POLICY "Products are updatable by authenticated users only" ON products
 CREATE POLICY "Products are deletable by authenticated users only" ON products
   FOR DELETE USING (auth.role() = 'authenticated');
 
--- Orders: Anyone can insert (checkout), only authenticated users can view/modify
-CREATE POLICY "Orders are insertable by everyone" ON orders
-  FOR INSERT WITH CHECK (true);
+-- Orders: Anyone (including anonymous) can insert, only authenticated users can view/modify
+CREATE POLICY "Allow public order inserts" ON orders
+  FOR INSERT 
+  TO anon, authenticated
+  WITH CHECK (true);
 
-CREATE POLICY "Orders are viewable by authenticated users only" ON orders
-  FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated order reads" ON orders
+  FOR SELECT 
+  TO authenticated
+  USING (true);
 
-CREATE POLICY "Orders are updatable by authenticated users only" ON orders
-  FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated order updates" ON orders
+  FOR UPDATE 
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
--- Contact messages: Anyone can insert, only authenticated users can view/modify
-CREATE POLICY "Contact messages are insertable by everyone" ON contact_messages
-  FOR INSERT WITH CHECK (true);
+-- Contact messages: Anyone (including anonymous) can insert, only authenticated users can view/modify
+CREATE POLICY "Allow public message inserts" ON contact_messages
+  FOR INSERT 
+  TO anon, authenticated
+  WITH CHECK (true);
 
-CREATE POLICY "Contact messages are viewable by authenticated users only" ON contact_messages
-  FOR SELECT USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated message reads" ON contact_messages
+  FOR SELECT 
+  TO authenticated
+  USING (true);
 
-CREATE POLICY "Contact messages are updatable by authenticated users only" ON contact_messages
-  FOR UPDATE USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated message updates" ON contact_messages
+  FOR UPDATE 
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
 
-CREATE POLICY "Contact messages are deletable by authenticated users only" ON contact_messages
-  FOR DELETE USING (auth.role() = 'authenticated');
+CREATE POLICY "Allow authenticated message deletes" ON contact_messages
+  FOR DELETE 
+  TO authenticated
+  USING (true);
+
+-- Newsletter subscribers table
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+  email TEXT NOT NULL UNIQUE,
+  subscribed_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+  is_active BOOLEAN DEFAULT true
+);
+
+-- Enable RLS on newsletter_subscribers
+ALTER TABLE newsletter_subscribers ENABLE ROW LEVEL SECURITY;
+
+-- Newsletter: Anyone (including anonymous) can subscribe, only authenticated users can view
+CREATE POLICY "Allow public newsletter inserts" ON newsletter_subscribers
+  FOR INSERT 
+  TO anon, authenticated
+  WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated newsletter reads" ON newsletter_subscribers
+  FOR SELECT 
+  TO authenticated
+  USING (true);
+
+CREATE POLICY "Allow authenticated newsletter updates" ON newsletter_subscribers
+  FOR UPDATE 
+  TO authenticated
+  USING (true)
+  WITH CHECK (true);
+
+CREATE POLICY "Allow authenticated newsletter deletes" ON newsletter_subscribers
+  FOR DELETE 
+  TO authenticated
+  USING (true);
 
 -- Create indexes for better performance
 CREATE INDEX IF NOT EXISTS idx_products_category ON products(category);
@@ -93,6 +142,7 @@ CREATE INDEX IF NOT EXISTS idx_orders_status ON orders(status);
 CREATE INDEX IF NOT EXISTS idx_orders_created_at ON orders(created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_read ON contact_messages(read);
 CREATE INDEX IF NOT EXISTS idx_contact_messages_created_at ON contact_messages(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_newsletter_subscribers_email ON newsletter_subscribers(email);
 
 -- Insert sample products (optional - you can remove this if you want to start fresh)
 INSERT INTO products (name, description, price, category, image, in_stock) VALUES

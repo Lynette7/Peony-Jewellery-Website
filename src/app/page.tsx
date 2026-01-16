@@ -1,6 +1,7 @@
 import Hero from '@/components/home/Hero';
 import FeaturedProducts from '@/components/home/FeaturedProducts';
 import Categories from '@/components/home/Categories';
+import NewsletterForm from '@/components/home/NewsletterForm';
 
 export default function Home() {
   return (
@@ -18,19 +19,7 @@ export default function Home() {
           <p className="text-background/80 mb-8 max-w-2xl mx-auto">
             Subscribe to get special offers, free giveaways, and new arrivals straight to your inbox.
           </p>
-          <form className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="flex-1 px-6 py-3 rounded-full bg-background text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-accent"
-            />
-            <button
-              type="submit"
-              className="px-8 py-3 bg-accent text-accent-foreground rounded-full font-medium hover:opacity-90 transition-opacity"
-            >
-              Subscribe
-            </button>
-          </form>
+          <NewsletterForm />
         </div>
       </section>
 

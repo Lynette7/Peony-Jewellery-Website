@@ -2,7 +2,8 @@ import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import ProductCard from '@/components/ui/ProductCard';
 import CategoryFilter from '@/components/ui/CategoryFilter';
-import { getProductsByCategory, categories } from '@/data/products';
+import { getProductsByCategory } from '@/lib/products';
+import { categories } from '@/data/products';
 import { Category } from '@/types';
 
 interface CategoryPageProps {
@@ -35,6 +36,9 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   };
 }
 
+// Revalidate every 60 seconds to get fresh data
+export const revalidate = 60;
+
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params;
   
@@ -44,7 +48,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     notFound();
   }
 
-  const categoryProducts = getProductsByCategory(category as Category);
+  const categoryProducts = await getProductsByCategory(category as Category);
 
   return (
     <div className="min-h-screen bg-background">
@@ -70,7 +74,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         {/* Results Count */}
         <div className="mb-6">
           <p className="text-muted-foreground">
-            Showing <span className="text-foreground font-medium">{categoryProducts.length}</span> products
+            Showing <span className="text-foreground font-medium">{categoryProducts.length}</span> products in {categoryInfo.name}
           </p>
         </div>
 
@@ -83,8 +87,11 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           </div>
         ) : (
           <div className="text-center py-16">
-            <p className="text-muted-foreground text-lg">
-              No products found in this category.
+            <p className="text-muted-foreground text-lg mb-4">
+              No products found in this category yet.
+            </p>
+            <p className="text-muted-foreground">
+              Check back soon for new arrivals!
             </p>
           </div>
         )}

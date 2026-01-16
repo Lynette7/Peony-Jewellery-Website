@@ -8,6 +8,7 @@ import {
   Package, 
   ShoppingCart, 
   MessageSquare, 
+  Mail,
   LogOut,
   Menu,
   X,
@@ -20,6 +21,7 @@ const navItems = [
   { href: '/admin/products', label: 'Products', icon: Package },
   { href: '/admin/orders', label: 'Orders', icon: ShoppingCart },
   { href: '/admin/messages', label: 'Messages', icon: MessageSquare },
+  { href: '/admin/newsletter', label: 'Newsletter', icon: Mail },
 ];
 
 export default function AdminLayout({

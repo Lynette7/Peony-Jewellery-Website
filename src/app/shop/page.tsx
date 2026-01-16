@@ -1,14 +1,19 @@
 import { Metadata } from 'next';
 import ProductCard from '@/components/ui/ProductCard';
 import CategoryFilter from '@/components/ui/CategoryFilter';
-import { products } from '@/data/products';
+import { getProducts } from '@/lib/products';
 
 export const metadata: Metadata = {
   title: 'Shop All | Peony HQ Kenya',
   description: 'Browse our complete collection of beautiful jewellery including earrings, necklaces, rings, and bracelets.',
 };
 
-export default function ShopPage() {
+// Revalidate every 60 seconds to get fresh data
+export const revalidate = 60;
+
+export default async function ShopPage() {
+  const products = await getProducts();
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -44,6 +49,12 @@ export default function ShopPage() {
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
+
+        {products.length === 0 && (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">No products found. Check back soon!</p>
+          </div>
+        )}
       </div>
     </div>
   );
