@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -30,16 +31,47 @@ export default function AdminLoginPage() {
         return;
       }
 
-      if (data.user) {
-        const userRole = data.user.user_metadata?.role;
-        if (userRole !== 'admin') {
-          await supabase.auth.signOut();
-          setError('Access denied. Admin privileges required.');
-          setIsLoading(false);
-          return;
-        }
+      // Check if we have both user and session
+      if (!data.user || !data.session) {
+        setError('Login failed. Please check your credentials.');
+        setIsLoading(false);
+        return;
       }
 
+      // Check role from database (user_profiles table)
+      // Use RPC function to avoid RLS issues, or query with proper error handling
+      const { data: profile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single();
+
+      // If profile doesn't exist or error, check if it's an RLS issue
+      if (profileError) {
+        console.error('Profile error:', profileError);
+        // If it's a permission error, the user might not have a profile yet
+        // Try to create one or show a more helpful error
+        if (profileError.code === 'PGRST116' || profileError.message?.includes('permission')) {
+          setError('User profile not found. Please contact support.');
+        } else {
+          setError('Access denied. Admin privileges required.');
+        }
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        return;
+      }
+
+      if (profile?.role !== 'admin') {
+        await supabase.auth.signOut();
+        setError('Access denied. Admin privileges required.');
+        setIsLoading(false);
+        return;
+      }
+
+      // Wait a moment for cookies to be set before navigating
+      // This ensures the proxy can read the session on the next request
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       router.push('/admin');
       router.refresh();
     } catch {
@@ -125,12 +157,12 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <div className="mt-8 pt-6 border-t border-[#920b4c] text-center">
-          <a
+          <Link
             href="/"
             className="text-sm text-[#f8dae2] hover:text-[#fcfbf9] transition-colors"
           >
             ← Back to Website
-          </a>
+          </Link>
         </div>
 
         {/* Setup Instructions */}

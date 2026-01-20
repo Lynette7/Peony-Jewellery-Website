@@ -39,23 +39,46 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // Get user with error handling
+  let user = null;
+  try {
+    const { data: { user: authUser } } = await supabase.auth.getUser();
+    user = authUser;
+  } catch (error) {
+    // If getUser fails, user stays null and will be redirected to login
+    console.error('Error getting user in proxy:', error);
+  }
 
   if (request.nextUrl.pathname.startsWith('/admin')) {
     if (request.nextUrl.pathname === '/admin/login') {
-      if (user && user.user_metadata?.role === 'admin') {
-        return NextResponse.redirect(new URL('/admin', request.url));
+      // Check role from database (user_profiles table)
+      if (user) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        if (profile?.role === 'admin') {
+          return NextResponse.redirect(new URL('/admin', request.url));
+        }
       }
       return supabaseResponse;
     }
 
+    // Protect admin routes
     if (!user) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
-    if (user.user_metadata?.role !== 'admin') {
+    // Check role from database (user_profiles table)
+    const { data: profile } = await supabase
+      .from('user_profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile?.role !== 'admin') {
       return NextResponse.redirect(new URL('/', request.url));
     }
   }
