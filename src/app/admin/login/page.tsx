@@ -19,7 +19,7 @@ export default function AdminLoginPage() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
@@ -28,6 +28,16 @@ export default function AdminLoginPage() {
         setError(error.message);
         setIsLoading(false);
         return;
+      }
+
+      if (data.user) {
+        const userRole = data.user.user_metadata?.role;
+        if (userRole !== 'admin') {
+          await supabase.auth.signOut();
+          setError('Access denied. Admin privileges required.');
+          setIsLoading(false);
+          return;
+        }
       }
 
       router.push('/admin');
