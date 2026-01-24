@@ -1,20 +1,42 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 import Button from '@/components/ui/Button';
+import { createClient } from '@/lib/supabase/client';
 
 export default function LoginPage() {
   const router = useRouter();
-  const { signIn, loading: authLoading } = useAuth();
+  const { signIn, loading: authLoading, user } = useAuth();
+  const { isAdmin } = useAdminMode();
+  const supabase = createClient();
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+
+  // Redirect admins to admin login
+  useEffect(() => {
+    async function checkAdminStatus() {
+      if (user) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+
+        if (profile?.role === 'admin') {
+          router.push('/admin/login');
+        }
+      }
+    }
+    checkAdminStatus();
+  }, [user, router, supabase]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,7 +46,23 @@ export default function LoginPage() {
     const result = await signIn(email, password);
 
     if (result.success) {
-      router.push('/account');
+      // Check if user is admin and redirect accordingly
+      const { data: { user: authUser } } = await supabase.auth.getUser();
+      if (authUser) {
+        const { data: profile } = await supabase
+          .from('user_profiles')
+          .select('role')
+          .eq('id', authUser.id)
+          .single();
+
+        if (profile?.role === 'admin') {
+          router.push('/admin');
+        } else {
+          router.push('/account');
+        }
+      } else {
+        router.push('/account');
+      }
       router.refresh();
     } else {
       setError(result.error || 'Failed to sign in. Please try again.');
@@ -113,6 +151,18 @@ export default function LoginPage() {
                 Sign up
               </Link>
             </p>
+            
+            <div className="pt-4 border-t border-border">
+              <p className="text-xs text-muted-foreground mb-2">
+                Are you an admin?
+              </p>
+              <Link
+                href="/admin/login"
+                className="text-sm text-primary hover:underline font-medium"
+              >
+                Admin Login →
+              </Link>
+            </div>
             
             <Link
               href="/"

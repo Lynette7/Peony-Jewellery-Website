@@ -13,9 +13,11 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronRight
+  ChevronRight,
+  Eye
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { useAdminMode } from '@/contexts/AdminModeContext';
 
 const navItems = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
@@ -36,6 +38,7 @@ export default function AdminLayout({
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [user, setUser] = useState<{ email?: string } | null>(null);
   const supabase = createClient();
+  const { isCustomerMode, toggleCustomerMode } = useAdminMode();
 
   useEffect(() => {
     const getUser = async () => {
@@ -45,6 +48,13 @@ export default function AdminLayout({
     getUser();
   }, [supabase.auth]);
 
+  // If in customer mode, redirect to home page (customer view)
+  useEffect(() => {
+    if (isCustomerMode && pathname.startsWith('/admin') && pathname !== '/admin/login') {
+      router.push('/');
+    }
+  }, [isCustomerMode, pathname, router]);
+
   const handleLogout = async () => {
     await supabase.auth.signOut();
     router.push('/admin/login');
@@ -53,6 +63,11 @@ export default function AdminLayout({
   // Don't show sidebar on login page
   if (pathname === '/admin/login') {
     return <>{children}</>;
+  }
+
+  // Don't render admin layout if in customer mode (will redirect)
+  if (isCustomerMode) {
+    return null;
   }
 
   return (
@@ -109,11 +124,18 @@ export default function AdminLayout({
             })}
           </nav>
 
-          {/* User info & Logout */}
+          {/* User info & Mode Toggle */}
           <div className="p-4 border-t border-[#920b4c]">
             {user?.email && (
               <p className="text-sm text-[#f8dae2] mb-3 truncate">{user.email}</p>
             )}
+            <button
+              onClick={toggleCustomerMode}
+              className="flex items-center space-x-2 w-full px-4 py-2 mb-2 text-[#f8dae2] hover:bg-[#920b4c]/50 hover:text-[#fcfbf9] rounded-lg transition-colors"
+            >
+              <Eye size={20} />
+              <span>{isCustomerMode ? 'Exit Customer View' : 'View as Customer'}</span>
+            </button>
             <button
               onClick={handleLogout}
               className="flex items-center space-x-2 w-full px-4 py-2 text-[#f8dae2] hover:bg-[#920b4c]/50 hover:text-[#fcfbf9] rounded-lg transition-colors"
@@ -147,6 +169,13 @@ export default function AdminLayout({
               <Menu size={24} />
             </button>
             <div className="flex items-center space-x-4">
+              {isCustomerMode && (
+                <div className="px-3 py-1 bg-yellow-600/20 border border-yellow-500/50 rounded-lg">
+                  <span className="text-xs text-yellow-300 font-medium">
+                    Customer View Mode
+                  </span>
+                </div>
+              )}
               <span className="text-sm text-[#f8dae2]">
                 {new Date().toLocaleDateString('en-KE', {
                   weekday: 'long',

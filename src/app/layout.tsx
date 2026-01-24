@@ -5,8 +5,10 @@ import { CartProvider } from "@/contexts/CartContext";
 import { WishlistProvider } from "@/contexts/WishlistContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { AdminModeProvider } from "@/contexts/AdminModeContext";
 import Navbar from "@/components/layout/Navbar";
 import Footer from "@/components/layout/Footer";
+import AdminCustomerModeBanner from "@/components/admin/AdminCustomerModeBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,15 +43,18 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AuthProvider>
-            <CartProvider>
-              <WishlistProvider>
-                <Navbar />
-                <main className="flex-1">
-                  {children}
-                </main>
-                <Footer />
-              </WishlistProvider>
-            </CartProvider>
+            <AdminModeProvider>
+              <CartProvider>
+                <WishlistProvider>
+                  <AdminCustomerModeBanner />
+                  <Navbar />
+                  <main className="flex-1">
+                    {children}
+                  </main>
+                  <Footer />
+                </WishlistProvider>
+              </CartProvider>
+            </AdminModeProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>
