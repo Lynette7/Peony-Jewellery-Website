@@ -31,7 +31,6 @@ export default function OrdersPage() {
   const { user, loading: authLoading } = useAuth();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -41,7 +40,12 @@ export default function OrdersPage() {
 
   useEffect(() => {
     async function fetchOrders() {
-      if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
+
+      const supabase = createClient();
 
       try {
         const { data, error } = await supabase
@@ -52,6 +56,7 @@ export default function OrdersPage() {
 
         if (error) {
           console.error('Error fetching orders:', error);
+          setLoading(false);
           return;
         }
 
@@ -63,10 +68,10 @@ export default function OrdersPage() {
       }
     }
 
-    if (user) {
+    if (!authLoading) {
       fetchOrders();
     }
-  }, [user, supabase]);
+  }, [user, authLoading]);
 
   if (authLoading || loading) {
     return (

@@ -40,7 +40,6 @@ export default function OrderDetailPage() {
   const { user, loading: authLoading } = useAuth();
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -50,7 +49,12 @@ export default function OrderDetailPage() {
 
   useEffect(() => {
     async function fetchOrder() {
-      if (!user || !orderId) return;
+      if (!user || !orderId) {
+        setLoading(false);
+        return;
+      }
+
+      const supabase = createClient();
 
       try {
         const { data, error } = await supabase
@@ -62,6 +66,7 @@ export default function OrderDetailPage() {
 
         if (error) {
           console.error('Error fetching order:', error);
+          setLoading(false);
           return;
         }
 
@@ -73,10 +78,10 @@ export default function OrderDetailPage() {
       }
     }
 
-    if (user && orderId) {
+    if (!authLoading) {
       fetchOrder();
     }
-  }, [user, orderId, supabase]);
+  }, [user, orderId, authLoading]);
 
   if (authLoading || loading) {
     return (
