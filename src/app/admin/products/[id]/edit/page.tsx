@@ -27,7 +27,13 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     images: [],
     in_stock: true,
     featured: false,
+    specifications: null,
+    variants: null,
   });
+  const [specs, setSpecs] = useState({ material: '', color: '', design: '', properties: '', style: '' });
+  const [variants, setVariants] = useState<{ name: string; image: string }[]>([]);
+  const [newVariantName, setNewVariantName] = useState('');
+  const [newVariantImage, setNewVariantImage] = useState('');
   const [newImageUrl, setNewImageUrl] = useState('');
   const [carouselUploadMode, setCarouselUploadMode] = useState<'upload' | 'url'>('upload');
   const [isUploadingCarousel, setIsUploadingCarousel] = useState(false);
@@ -57,7 +63,24 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         images: data.images || [],
         in_stock: data.in_stock,
         featured: data.featured || false,
+        specifications: data.specifications || null,
+        variants: data.variants || null,
       });
+      // Load specs
+      if (data.specifications) {
+        const s = data.specifications as Record<string, string>;
+        setSpecs({
+          material: s.material || '',
+          color: s.color || '',
+          design: s.design || '',
+          properties: s.properties || '',
+          style: s.style || '',
+        });
+      }
+      // Load variants
+      if (data.variants && Array.isArray(data.variants)) {
+        setVariants(data.variants as { name: string; image: string }[]);
+      }
     } catch (err) {
       setError('Failed to load product');
       console.error(err);
@@ -108,6 +131,42 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     }));
   };
 
+  const handleSpecChange = (field: string, value: string) => {
+    setSpecs(prev => ({ ...prev, [field]: value }));
+  };
+
+  const addVariant = () => {
+    if (newVariantName.trim() && newVariantImage.trim()) {
+      setVariants(prev => [...prev, { name: newVariantName.trim(), image: newVariantImage.trim() }]);
+      setNewVariantName('');
+      setNewVariantImage('');
+    }
+  };
+
+  const removeVariant = (index: number) => {
+    setVariants(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const handleVariantImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !file.type.startsWith('image/') || file.size > 5 * 1024 * 1024) return;
+
+    const fileExt = file.name.split('.').pop();
+    const fileName = `variant-${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file, { cacheControl: '3600', upsert: false });
+
+    if (!uploadError) {
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(fileName);
+      setNewVariantImage(publicUrl);
+    }
+    e.target.value = '';
+  };
+
   const handleCarouselFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
@@ -155,10 +214,17 @@ export default function EditProductPage({ params }: EditProductPageProps) {
 
     setIsSaving(true);
 
+    const hasSpecs = Object.values(specs).some(v => v.trim());
+    const finalData = {
+      ...formData,
+      specifications: hasSpecs ? specs : null,
+      variants: variants.length > 0 ? variants : null,
+    };
+
     try {
       const { error } = await supabase
         .from('products')
-        .update(formData)
+        .update(finalData)
         .eq('id', id);
 
       if (error) throw error;
@@ -272,6 +338,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                 <option value="necklaces">Necklaces</option>
                 <option value="rings">Rings</option>
                 <option value="bracelets">Bracelets</option>
+                <option value="sets">Jewellery Sets</option>
               </select>
             </div>
           </div>
@@ -394,6 +461,101 @@ export default function EditProductPage({ params }: EditProductPageProps) {
             <p className="text-xs text-[#f8dae2]/70 mt-2">
               Add additional images for the product carousel. These will show after the main image.
             </p>
+          </div>
+
+          {/* Specifications (Optional) */}
+          <div className="border border-[#920b4c] rounded-lg p-4">
+            <h3 className="text-sm font-medium text-[#fcfbf9] mb-3">Specifications (Optional)</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              {(['material', 'color', 'design', 'properties', 'style'] as const).map((field) => (
+                <div key={field}>
+                  <label className="block text-xs font-medium text-[#f8dae2] mb-1 capitalize">
+                    {field}
+                  </label>
+                  <input
+                    type="text"
+                    value={specs[field]}
+                    onChange={(e) => handleSpecChange(field, e.target.value)}
+                    className="w-full px-3 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50 text-sm"
+                    placeholder={`e.g., ${field === 'material' ? 'Sterling Silver' : field === 'color' ? 'Gold' : field === 'design' ? 'Minimalist' : field === 'properties' ? 'Hypoallergenic' : 'Bohemian'}`}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Variants (Optional) */}
+          <div className="border border-[#920b4c] rounded-lg p-4">
+            <h3 className="text-sm font-medium text-[#fcfbf9] mb-3">Variants (Optional)</h3>
+            <p className="text-xs text-[#f8dae2]/70 mb-3">Add different variants of this product (e.g., different colors or sizes).</p>
+            
+            <div className="space-y-3">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newVariantName}
+                  onChange={(e) => setNewVariantName(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50 text-sm"
+                  placeholder="Variant name (e.g., Rose Gold)"
+                />
+                <button
+                  type="button"
+                  onClick={addVariant}
+                  disabled={!newVariantName.trim() || !newVariantImage.trim()}
+                  className="px-3 py-2 bg-[#920b4c] text-[#fcfbf9] rounded-lg hover:bg-[#a80d58] transition-colors disabled:opacity-50 flex items-center text-sm"
+                >
+                  <Plus size={16} className="mr-1" />
+                  Add
+                </button>
+              </div>
+              <div className="flex gap-2 items-center">
+                <input
+                  type="url"
+                  value={newVariantImage}
+                  onChange={(e) => setNewVariantImage(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9] placeholder-[#f8dae2]/50 text-sm"
+                  placeholder="Image URL or upload"
+                />
+                <label className="px-3 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg text-[#f8dae2] text-sm cursor-pointer hover:bg-[#920b4c]/30 transition-colors flex items-center">
+                  <Upload size={14} className="mr-1" />
+                  Upload
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleVariantImageUpload}
+                    className="hidden"
+                  />
+                </label>
+                {newVariantImage && (
+                  <div className="w-10 h-10 rounded overflow-hidden bg-[#4d0025] border border-[#920b4c] flex-shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={newVariantImage} alt="Preview" className="w-full h-full object-cover" />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Variant List */}
+            {variants.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {variants.map((variant, index) => (
+                  <div key={index} className="flex items-center gap-3 bg-[#4d0025] rounded-lg p-2 border border-[#920b4c]/50">
+                    <div className="w-10 h-10 rounded overflow-hidden bg-[#920b4c]/30 flex-shrink-0">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={variant.image} alt={variant.name} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="flex-1 text-sm text-[#fcfbf9]">{variant.name}</span>
+                    <button
+                      type="button"
+                      onClick={() => removeVariant(index)}
+                      className="p-1 text-[#f8dae2] hover:text-red-400 transition-colors"
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
 
           {/* Stock & Featured */}

@@ -124,6 +124,7 @@ export default function AdminProductsPage() {
             <option value="necklaces">Necklaces</option>
             <option value="rings">Rings</option>
             <option value="bracelets">Bracelets</option>
+            <option value="sets">Jewellery Sets</option>
           </select>
         </div>
       </div>

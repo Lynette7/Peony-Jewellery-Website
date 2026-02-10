@@ -5,7 +5,7 @@ import { getProducts } from '@/lib/products';
 
 export const metadata: Metadata = {
   title: 'Shop All | Peony HQ Kenya',
-  description: 'Browse our complete collection of beautiful jewellery including earrings, necklaces, rings, and bracelets.',
+  description: 'Browse our complete collection of beautiful jewellery including earrings, necklaces, rings, bracelets, and jewellery sets.',
 };
 
 // Revalidate every 60 seconds to get fresh data

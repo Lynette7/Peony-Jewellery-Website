@@ -121,6 +121,11 @@ export default function Footer() {
                   Bracelets
                 </Link>
               </li>
+              <li>
+                <Link href="/shop/sets" className="text-muted-foreground hover:text-primary transition-colors text-sm">
+                  Jewellery Sets
+                </Link>
+              </li>
             </ul>
           </div>
 

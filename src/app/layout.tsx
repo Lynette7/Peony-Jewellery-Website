@@ -22,8 +22,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Peony HQ Kenya | Elegant Jewellery",
-  description: "Discover beautiful, handcrafted jewellery at Peony HQ Kenya. Shop our collection of earrings, necklaces, rings, and bracelets.",
-  keywords: ["jewellery", "Kenya", "earrings", "necklaces", "rings", "bracelets", "Peony HQ"],
+  description: "Discover beautiful, handcrafted jewellery at Peony HQ Kenya. Shop our collection of earrings, necklaces, rings, bracelets, and jewellery sets.",
+  keywords: ["jewellery", "Kenya", "earrings", "necklaces", "rings", "bracelets", "jewellery sets", "Peony HQ"],
   icons: {
     icon: "/peony-tab.svg",
     shortcut: "/peony-tab.svg",

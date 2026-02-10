@@ -261,19 +261,38 @@ export default function ProductDetail({ product }: ProductDetailProps) {
               </p>
             </div>
 
-            {/* Product Details */}
-            {(product.material || product.color) && (
+            {/* Specifications */}
+            {(product.specifications && Object.values(product.specifications).some(v => v)) && (
               <div className="space-y-2 border-t border-b border-border py-4">
-                {product.material && (
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider mb-2">Specifications</h3>
+                {product.specifications.material && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Material:</span>
-                    <span className="text-foreground font-medium">{product.material}</span>
+                    <span className="text-foreground font-medium">{product.specifications.material}</span>
                   </div>
                 )}
-                {product.color && (
+                {product.specifications.color && (
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Color:</span>
-                    <span className="text-foreground font-medium">{product.color}</span>
+                    <span className="text-foreground font-medium">{product.specifications.color}</span>
+                  </div>
+                )}
+                {product.specifications.design && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Design:</span>
+                    <span className="text-foreground font-medium">{product.specifications.design}</span>
+                  </div>
+                )}
+                {product.specifications.properties && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Properties:</span>
+                    <span className="text-foreground font-medium">{product.specifications.properties}</span>
+                  </div>
+                )}
+                {product.specifications.style && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Style:</span>
+                    <span className="text-foreground font-medium">{product.specifications.style}</span>
                   </div>
                 )}
                 <div className="flex justify-between">
@@ -281,6 +300,44 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                   <span className={product.inStock ? 'text-green-600 font-medium' : 'text-red-500 font-medium'}>
                     {product.inStock ? 'In Stock' : 'Out of Stock'}
                   </span>
+                </div>
+              </div>
+            )}
+
+            {/* Availability (shown when no specs) */}
+            {(!product.specifications || !Object.values(product.specifications).some(v => v)) && (
+              <div className="border-t border-b border-border py-4">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Availability:</span>
+                  <span className={product.inStock ? 'text-green-600 font-medium' : 'text-red-500 font-medium'}>
+                    {product.inStock ? 'In Stock' : 'Out of Stock'}
+                  </span>
+                </div>
+              </div>
+            )}
+
+            {/* Variants */}
+            {product.variants && product.variants.length > 0 && (
+              <div className="space-y-3">
+                <h3 className="text-sm font-semibold text-foreground uppercase tracking-wider">Variants</h3>
+                <div className="flex flex-wrap gap-3">
+                  {product.variants.map((variant, index) => (
+                    <div
+                      key={index}
+                      className="flex items-center space-x-3 border border-border rounded-xl p-2 pr-4 hover:border-primary transition-colors"
+                    >
+                      <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        <Image
+                          src={variant.image}
+                          alt={variant.name}
+                          fill
+                          className="object-cover"
+                          sizes="48px"
+                        />
+                      </div>
+                      <span className="text-sm text-foreground font-medium">{variant.name}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

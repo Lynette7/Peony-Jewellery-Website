@@ -15,11 +15,13 @@ export type Database = {
           name: string;
           description: string;
           price: number;
-          category: 'earrings' | 'necklaces' | 'rings' | 'bracelets';
+          category: 'earrings' | 'necklaces' | 'rings' | 'bracelets' | 'sets';
           image: string;
           images: string[];
           in_stock: boolean;
           featured: boolean;
+          specifications: Json | null;
+          variants: Json | null;
           created_at: string;
         };
         Insert: {
@@ -27,11 +29,13 @@ export type Database = {
           name: string;
           description: string;
           price: number;
-          category: 'earrings' | 'necklaces' | 'rings' | 'bracelets';
+          category: 'earrings' | 'necklaces' | 'rings' | 'bracelets' | 'sets';
           image: string;
           images?: string[];
           in_stock?: boolean;
           featured?: boolean;
+          specifications?: Json | null;
+          variants?: Json | null;
           created_at?: string;
         };
         Update: {
@@ -39,11 +43,13 @@ export type Database = {
           name?: string;
           description?: string;
           price?: number;
-          category?: 'earrings' | 'necklaces' | 'rings' | 'bracelets';
+          category?: 'earrings' | 'necklaces' | 'rings' | 'bracelets' | 'sets';
           image?: string;
           images?: string[];
           in_stock?: boolean;
           featured?: boolean;
+          specifications?: Json | null;
+          variants?: Json | null;
           created_at?: string;
         };
       };

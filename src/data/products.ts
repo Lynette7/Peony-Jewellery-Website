@@ -25,6 +25,12 @@ export const categories: CategoryInfo[] = [
     description: 'Charming bracelets for your wrist',
     image: 'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400&h=400&fit=crop',
   },
+  {
+    id: 'sets',
+    name: 'Jewellery Sets',
+    description: 'Perfectly matched sets for a complete look',
+    image: 'https://images.unsplash.com/photo-1601121141461-9d6647bca1ed?w=400&h=400&fit=crop',
+  },
 ];
 
 // Static fallback products (used when Supabase is not configured)
@@ -237,19 +243,11 @@ export const formatPrice = (price: number): string => {
   return `KES ${price.toLocaleString()}`;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type DbProduct = Record<string, any>;
+
 // Convert Supabase product to frontend Product type
-export const mapSupabaseProduct = (dbProduct: {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  image: string;
-  images?: string[] | null;
-  in_stock: boolean;
-  featured?: boolean;
-  created_at: string;
-}): Product => ({
+export const mapSupabaseProduct = (dbProduct: DbProduct): Product => ({
   id: dbProduct.id,
   name: dbProduct.name,
   description: dbProduct.description,
@@ -259,4 +257,6 @@ export const mapSupabaseProduct = (dbProduct: {
   images: dbProduct.images || [],
   inStock: dbProduct.in_stock,
   featured: dbProduct.featured || false,
+  specifications: dbProduct.specifications || undefined,
+  variants: dbProduct.variants || undefined,
 });

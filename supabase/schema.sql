@@ -10,11 +10,13 @@ CREATE TABLE IF NOT EXISTS products (
   name TEXT NOT NULL,
   description TEXT NOT NULL,
   price INTEGER NOT NULL,
-  category TEXT NOT NULL CHECK (category IN ('earrings', 'necklaces', 'rings', 'bracelets')),
+  category TEXT NOT NULL CHECK (category IN ('earrings', 'necklaces', 'rings', 'bracelets', 'sets')),
   image TEXT NOT NULL,
   images JSONB DEFAULT '[]'::jsonb,
   in_stock BOOLEAN DEFAULT true,
   featured BOOLEAN DEFAULT false,
+  specifications JSONB DEFAULT NULL,
+  variants JSONB DEFAULT NULL,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 

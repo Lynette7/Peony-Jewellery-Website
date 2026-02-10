@@ -1,4 +1,17 @@
-export type Category = 'earrings' | 'necklaces' | 'rings' | 'bracelets';
+export type Category = 'earrings' | 'necklaces' | 'rings' | 'bracelets' | 'sets';
+
+export interface ProductSpecifications {
+  material?: string;
+  color?: string;
+  design?: string;
+  properties?: string;
+  style?: string;
+}
+
+export interface ProductVariant {
+  name: string;
+  image: string;
+}
 
 export interface Product {
   id: string;
@@ -10,8 +23,8 @@ export interface Product {
   images?: string[];
   inStock: boolean;
   featured?: boolean;
-  material?: string;
-  color?: string;
+  specifications?: ProductSpecifications;
+  variants?: ProductVariant[];
 }
 
 export interface CartItem {
