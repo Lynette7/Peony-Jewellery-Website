@@ -64,7 +64,10 @@ export default function AccountPage() {
             </div>
           </Link>
 
-          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group cursor-pointer">
+          <Link
+            href="/wishlist"
+            className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group"
+          >
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <Heart className="text-primary" size={24} />
@@ -74,9 +77,12 @@ export default function AccountPage() {
                 <p className="text-sm text-muted-foreground">Saved items</p>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group cursor-pointer">
+          <Link
+            href="/account/addresses"
+            className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group"
+          >
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <MapPin className="text-primary" size={24} />
@@ -86,9 +92,12 @@ export default function AccountPage() {
                 <p className="text-sm text-muted-foreground">Manage addresses</p>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group cursor-pointer">
+          <Link
+            href="/account/payment-methods"
+            className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group"
+          >
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <CreditCard className="text-primary" size={24} />
@@ -98,9 +107,12 @@ export default function AccountPage() {
                 <p className="text-sm text-muted-foreground">Manage payment info</p>
               </div>
             </div>
-          </div>
+          </Link>
 
-          <div className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group cursor-pointer">
+          <Link
+            href="/account/profile"
+            className="bg-card border border-border rounded-2xl p-6 hover:shadow-lg transition-shadow group"
+          >
             <div className="flex items-center space-x-4">
               <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
                 <User className="text-primary" size={24} />
@@ -110,7 +122,7 @@ export default function AccountPage() {
                 <p className="text-sm text-muted-foreground">Edit profile info</p>
               </div>
             </div>
-          </div>
+          </Link>
         </div>
 
         <div className="mt-8">
