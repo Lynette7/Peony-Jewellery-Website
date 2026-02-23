@@ -2,6 +2,14 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { OrderInsert, ContactMessageInsert, NewsletterSubscriberInsert, ReviewInsert, Review } from '@/types/database';
+import { sendEmail, ADMIN_EMAIL } from '@/lib/email';
+import React from 'react';
+import OrderConfirmation from '@/emails/OrderConfirmation';
+import AdminOrderNotification from '@/emails/AdminOrderNotification';
+import WelcomeEmail from '@/emails/WelcomeEmail';
+import NewsletterConfirmation from '@/emails/NewsletterConfirmation';
+import ContactConfirmation from '@/emails/ContactConfirmation';
+import AdminContactNotification from '@/emails/AdminContactNotification';
 
 export async function createOrder(orderData: OrderInsert) {
   try {
@@ -25,6 +33,60 @@ export async function createOrder(orderData: OrderInsert) {
       return { success: false, error: error.message };
     }
 
+    // ── Send emails (non-blocking) ──────────────────────────────────────────
+
+    const orderItems: {
+      id: string; name: string; price: number; quantity: number;
+      image: string; variant?: string | null;
+    }[] = Array.isArray(orderData.items) ? (orderData.items as {
+      id: string; name: string; price: number; quantity: number;
+      image: string; variant?: string | null;
+    }[]) : [];
+
+    const shipping = 300;
+    const subtotal = orderData.total;
+    const total = subtotal + shipping;
+
+    const customerName = orderData.customer_name;
+    const customerEmail = orderData.customer_email;
+    const orderId = data.id as string;
+
+    void Promise.all([
+      // Customer confirmation
+      sendEmail({
+        to: customerEmail,
+        subject: `Your Peony HQ order #${orderId} is confirmed 🌸`,
+        react: React.createElement(OrderConfirmation, {
+          customerName,
+          customerEmail,
+          orderId,
+          items: orderItems,
+          subtotal,
+          shipping,
+          total,
+          paymentMethod: orderData.payment_method,
+          deliveryAddress: orderData.address,
+          city: orderData.city ?? '',
+        }),
+      }),
+      // Admin notification
+      sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `🛍️ New order #${orderId} — ${customerName} — KES ${total.toLocaleString()}`,
+        react: React.createElement(AdminOrderNotification, {
+          orderId,
+          customerName,
+          customerEmail,
+          customerPhone: orderData.customer_phone,
+          items: orderItems,
+          total,
+          paymentMethod: orderData.payment_method,
+          deliveryAddress: orderData.address,
+          city: orderData.city ?? '',
+        }),
+      }),
+    ]);
+
     return { success: true, data };
   } catch (error) {
     console.error('Error creating order:', error);
@@ -46,6 +108,33 @@ export async function createContactMessage(messageData: ContactMessageInsert) {
       console.error('Error creating contact message:', error);
       return { success: false, error: error.message };
     }
+
+    // ── Send emails (non-blocking) ──────────────────────────────────────────
+    void Promise.all([
+      // Confirmation to sender
+      sendEmail({
+        to: messageData.email,
+        subject: `We received your message — Peony HQ Kenya 🌸`,
+        react: React.createElement(ContactConfirmation, {
+          name: messageData.name,
+          email: messageData.email,
+          subject: messageData.subject,
+          message: messageData.message,
+        }),
+      }),
+      // Admin notification
+      sendEmail({
+        to: ADMIN_EMAIL,
+        subject: `💌 New message from ${messageData.name} — "${messageData.subject}"`,
+        react: React.createElement(AdminContactNotification, {
+          senderName: messageData.name,
+          senderEmail: messageData.email,
+          senderPhone: messageData.phone ?? null,
+          subject: messageData.subject,
+          message: messageData.message,
+        }),
+      }),
+    ]);
 
     return { success: true, data };
   } catch (error) {
@@ -80,6 +169,14 @@ export async function subscribeToNewsletter(subscriberData: NewsletterSubscriber
         console.error('Error reactivating subscription:', error);
         return { success: false, error: error.message };
       }
+
+      // Re-send confirmation for reactivated subscriptions
+      void sendEmail({
+        to: subscriberData.email,
+        subject: `Welcome back to Peony HQ! You're re-subscribed 🌸`,
+        react: React.createElement(NewsletterConfirmation, { email: subscriberData.email }),
+      });
+
       return { success: true, message: 'Subscription reactivated' };
     }
 
@@ -94,6 +191,13 @@ export async function subscribeToNewsletter(subscriberData: NewsletterSubscriber
       console.error('Error subscribing to newsletter:', error);
       return { success: false, error: error.message };
     }
+
+    // Send confirmation email
+    void sendEmail({
+      to: subscriberData.email,
+      subject: `You're on the list! Welcome to Peony HQ 🌸`,
+      react: React.createElement(NewsletterConfirmation, { email: subscriberData.email }),
+    });
 
     return { success: true, data };
   } catch (error) {
@@ -201,4 +305,15 @@ export async function getCategoryCoverImages(): Promise<Record<string, string>> 
       sets: '',
     };
   }
+}
+
+// ── Email-only actions ────────────────────────────────────────────────────────
+
+/** Called from the signup page after Supabase auth confirms user creation. */
+export async function sendWelcomeEmail(email: string, firstName?: string) {
+  return sendEmail({
+    to: email,
+    subject: `Welcome to Peony HQ Kenya 🌸`,
+    react: React.createElement(WelcomeEmail, { email, firstName: firstName ?? '' }),
+  });
 }

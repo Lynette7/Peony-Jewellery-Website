@@ -2,35 +2,74 @@
 
 import React, { useState } from 'react';
 import { subscribeToNewsletter } from '@/lib/actions';
+import { Sparkles } from 'lucide-react';
 
 export default function NewsletterForm() {
   const [email, setEmail] = useState('');
+  const [submittedEmail, setSubmittedEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!email) return;
-    
     setIsSubmitting(true);
-    setStatus('idle');
-    setMessage('');
+    setErrorMessage('');
 
     const result = await subscribeToNewsletter({ email });
-
     setIsSubmitting(false);
-    
+
     if (result.success) {
+      setSubmittedEmail(email);
       setStatus('success');
-      setMessage('Thank you for subscribing!');
       setEmail('');
     } else {
       setStatus('error');
-      setMessage(result.error || 'Failed to subscribe. Please try again.');
+      setErrorMessage(result.error || 'Failed to subscribe. Please try again.');
     }
   };
+
+  if (status === 'success') {
+    return (
+      <div className="flex flex-col items-center gap-5 animate-[fadeIn_0.4s_ease-out]">
+        {/* Icon badge */}
+        <div className="w-16 h-16 rounded-full bg-accent/20 border border-accent/40 flex items-center justify-center">
+          <Sparkles className="w-7 h-7 text-accent" />
+        </div>
+
+        {/* Headline */}
+        <div className="space-y-2 text-center">
+          <p className="text-2xl font-bold text-background">You&apos;re in! 🌸</p>
+          <p className="text-background/80 text-sm max-w-xs mx-auto">
+            Welcome to the Peony inner circle,{' '}
+            <span className="font-semibold text-accent">{submittedEmail}</span>.
+            Check your inbox for a little something from us.
+          </p>
+        </div>
+
+        {/* Perks row */}
+        <div className="flex flex-wrap justify-center gap-2 mt-1">
+          {['New arrivals first', 'Exclusive deals', 'Styling tips', 'Giveaways'].map((perk) => (
+            <span
+              key={perk}
+              className="px-3 py-1 rounded-full bg-accent/15 border border-accent/30 text-accent text-xs font-medium"
+            >
+              {perk}
+            </span>
+          ))}
+        </div>
+
+        {/* Re-subscribe nudge */}
+        <button
+          onClick={() => setStatus('idle')}
+          className="text-xs text-background/50 hover:text-background/80 transition-colors mt-1 underline underline-offset-2"
+        >
+          Use a different email
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div>
@@ -52,11 +91,9 @@ export default function NewsletterForm() {
           {isSubmitting ? 'Subscribing...' : 'Subscribe'}
         </button>
       </form>
-      
-      {status !== 'idle' && (
-        <p className={`mt-4 text-center ${status === 'success' ? 'text-green-300' : 'text-red-300'}`}>
-          {message}
-        </p>
+
+      {status === 'error' && (
+        <p className="mt-4 text-center text-red-300 text-sm">{errorMessage}</p>
       )}
     </div>
   );

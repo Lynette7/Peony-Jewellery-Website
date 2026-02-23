@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Mail, Lock, User, AlertCircle, Loader2 } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import Button from '@/components/ui/Button';
+import { sendWelcomeEmail } from '@/lib/actions';
 
 export default function SignupPage() {
   const router = useRouter();
@@ -41,6 +42,9 @@ export default function SignupPage() {
     const result = await signUp(email, password, firstName || undefined, lastName || undefined);
 
     if (result.success) {
+      // Fire welcome email (non-blocking — works for both confirmed and auto-confirmed)
+      void sendWelcomeEmail(email, firstName || undefined);
+
       if (result.needsConfirmation) {
         setShowConfirmationMessage(true);
         setIsLoading(false);
