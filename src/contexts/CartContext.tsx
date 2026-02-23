@@ -2,6 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import { Product, CartItem, ProductVariant } from '@/types';
+import { calculateDiscountedPrice } from '@/data/products';
 
 // Generate a unique key for a cart item based on product ID + variant
 function cartItemKey(productId: string, variant?: ProductVariant): string {
@@ -103,7 +104,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const getCartTotal = useCallback(() => {
-    return items.reduce((total, item) => total + item.product.price * item.quantity, 0);
+    return items.reduce((total, item) => {
+      const itemPrice = calculateDiscountedPrice(item.product.price, item.product.discount_percentage);
+      return total + itemPrice * item.quantity;
+    }, 0);
   }, [items]);
 
   const getCartCount = useCallback(() => {

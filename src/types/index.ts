@@ -23,6 +23,7 @@ export interface Product {
   images?: string[];
   inStock: boolean;
   featured?: boolean;
+  discount_percentage?: number | null;
   specifications?: ProductSpecifications;
   variants?: ProductVariant[];
 }

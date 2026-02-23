@@ -227,6 +227,12 @@ export const formatPrice = (price: number): string => {
   return `KES ${price.toLocaleString()}`;
 };
 
+// Calculate discounted price
+export const calculateDiscountedPrice = (originalPrice: number, discountPercentage: number | null | undefined): number => {
+  if (!discountPercentage || discountPercentage <= 0) return originalPrice;
+  return Math.round(originalPrice * (1 - discountPercentage / 100));
+};
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type DbProduct = Record<string, any>;
 
@@ -237,6 +243,7 @@ export const mapSupabaseProduct = (dbProduct: DbProduct): Product => ({
   description: dbProduct.description,
   price: dbProduct.price,
   category: dbProduct.category as Category,
+  discount_percentage: dbProduct.discount_percentage ?? null,
   image: dbProduct.image,
   images: dbProduct.images || [],
   inStock: dbProduct.in_stock,

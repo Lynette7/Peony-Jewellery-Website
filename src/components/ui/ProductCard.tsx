@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Heart, ShoppingCart, Eye } from 'lucide-react';
 import { Product } from '@/types';
-import { formatPrice } from '@/data/products';
+import { formatPrice, calculateDiscountedPrice } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 
@@ -122,9 +122,25 @@ export default function ProductCard({ product }: ProductCardProps) {
           <h3 className="font-medium text-foreground hover:text-primary transition-colors line-clamp-1">
             {product.name}
           </h3>
-          <p className="mt-2 text-primary font-semibold">
-            {formatPrice(product.price)}
-          </p>
+          <div className="mt-2">
+            {product.discount_percentage && product.discount_percentage > 0 ? (
+              <div className="flex items-center space-x-2 flex-wrap">
+                <span className="text-muted-foreground line-through text-sm">
+                  {formatPrice(product.price)}
+                </span>
+                <span className="text-primary font-semibold">
+                  {formatPrice(calculateDiscountedPrice(product.price, product.discount_percentage))}
+                </span>
+                <span className="text-xs bg-red-500 text-white px-2 py-0.5 rounded-full font-medium">
+                  -{product.discount_percentage}%
+                </span>
+              </div>
+            ) : (
+              <p className="text-primary font-semibold">
+                {formatPrice(product.price)}
+              </p>
+            )}
+          </div>
         </Link>
       </div>
     </div>

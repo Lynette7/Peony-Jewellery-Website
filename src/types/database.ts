@@ -20,6 +20,7 @@ export type Database = {
           images: string[];
           in_stock: boolean;
           featured: boolean;
+          discount_percentage: number | null;
           specifications: Json | null;
           variants: Json | null;
           created_at: string;
@@ -34,6 +35,7 @@ export type Database = {
           images?: string[];
           in_stock?: boolean;
           featured?: boolean;
+          discount_percentage?: number | null;
           specifications?: Json | null;
           variants?: Json | null;
           created_at?: string;
@@ -48,6 +50,7 @@ export type Database = {
           images?: string[];
           in_stock?: boolean;
           featured?: boolean;
+          discount_percentage?: number | null;
           specifications?: Json | null;
           variants?: Json | null;
           created_at?: string;

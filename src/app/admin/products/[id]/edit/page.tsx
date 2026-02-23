@@ -27,6 +27,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
     images: [],
     in_stock: true,
     featured: false,
+    discount_percentage: null,
     specifications: null,
     variants: null,
   });
@@ -63,6 +64,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
         images: data.images || [],
         in_stock: data.in_stock,
         featured: data.featured || false,
+        discount_percentage: data.discount_percentage ?? null,
         specifications: data.specifications || null,
         variants: data.variants || null,
       });
@@ -224,6 +226,7 @@ export default function EditProductPage({ params }: EditProductPageProps) {
       images: formData.images || [],
       in_stock: formData.in_stock,
       featured: formData.featured,
+      discount_percentage: formData.discount_percentage,
       specifications: hasSpecs ? specs : null,
       variants: variants.length > 0 ? variants : null,
     };
@@ -349,6 +352,35 @@ export default function EditProductPage({ params }: EditProductPageProps) {
                 <option value="sets">Jewellery Sets</option>
               </select>
             </div>
+          </div>
+
+          {/* Discount Percentage */}
+          <div>
+            <label htmlFor="discount_percentage" className="block text-sm font-medium text-[#f8dae2] mb-1">
+              Discount Percentage (0-100)
+            </label>
+            <input
+              type="number"
+              id="discount_percentage"
+              name="discount_percentage"
+              value={formData.discount_percentage ?? ''}
+              onChange={(e) => {
+                const value = e.target.value === '' ? null : parseInt(e.target.value);
+                setFormData(prev => ({
+                  ...prev,
+                  discount_percentage: value !== null && !isNaN(value) ? Math.max(0, Math.min(100, value)) : null
+                }));
+              }}
+              min="0"
+              max="100"
+              placeholder="e.g., 20 for 20% off"
+              className="w-full px-4 py-2 bg-[#4d0025] border border-[#920b4c] rounded-lg focus:ring-2 focus:ring-[#f8dae2] focus:border-transparent text-[#fcfbf9]"
+            />
+            {formData.discount_percentage && formData.discount_percentage > 0 && formData.price && (
+              <p className="mt-1 text-xs text-[#f8dae2]/70">
+                Discounted price: KES {Math.round(formData.price * (1 - formData.discount_percentage / 100)).toLocaleString()}
+              </p>
+            )}
           </div>
 
           {/* Main Image Upload */}

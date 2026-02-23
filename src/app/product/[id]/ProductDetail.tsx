@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Heart, ShoppingCart, Minus, Plus, ArrowLeft, Check, Truck, Shield, RotateCcw, Star, ChevronLeft, ChevronRight, Send } from 'lucide-react';
 import { Product, ProductVariant } from '@/types';
 import { Review } from '@/types/database';
-import { formatPrice } from '@/data/products';
+import { formatPrice, calculateDiscountedPrice } from '@/data/products';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
 import Button from '@/components/ui/Button';
@@ -281,9 +281,25 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 </div>
               )}
               
-              <p className="text-3xl font-bold text-primary">
-                {formatPrice(product.price)}
-              </p>
+              <div>
+                {product.discount_percentage && product.discount_percentage > 0 ? (
+                  <div className="flex items-center space-x-3 flex-wrap">
+                    <span className="text-muted-foreground line-through text-xl">
+                      {formatPrice(product.price)}
+                    </span>
+                    <span className="text-3xl font-bold text-primary">
+                      {formatPrice(calculateDiscountedPrice(product.price, product.discount_percentage))}
+                    </span>
+                    <span className="text-sm bg-red-500 text-white px-3 py-1 rounded-full font-medium">
+                      -{product.discount_percentage}% OFF
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-3xl font-bold text-primary">
+                    {formatPrice(product.price)}
+                  </p>
+                )}
+              </div>
             </div>
 
             {/* Description */}

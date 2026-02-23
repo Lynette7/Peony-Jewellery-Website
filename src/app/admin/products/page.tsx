@@ -203,7 +203,21 @@ export default function AdminProductsPage() {
                       <span className="capitalize text-[#f8dae2]">{product.category}</span>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="font-medium text-[#fcfbf9]">{formatPrice(product.price)}</span>
+                      <div className="flex flex-col">
+                        {product.discount_percentage && product.discount_percentage > 0 ? (
+                          <>
+                            <span className="text-muted-foreground line-through text-sm">
+                              {formatPrice(product.price)}
+                            </span>
+                            <span className="font-medium text-[#fcfbf9]">
+                              {formatPrice(Math.round(product.price * (1 - product.discount_percentage / 100)))}
+                            </span>
+                            <span className="text-xs text-red-400">-{product.discount_percentage}%</span>
+                          </>
+                        ) : (
+                          <span className="font-medium text-[#fcfbf9]">{formatPrice(product.price)}</span>
+                        )}
+                      </div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="flex items-center space-x-2">
