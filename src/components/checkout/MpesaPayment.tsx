@@ -27,18 +27,67 @@ export default function MpesaPayment({
     setIsProcessing(true);
     setStatus("pending");
 
-    // Simulate M-Pesa STK Push
-    // In production, this would call your backend which integrates with Safaricom Daraja API
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+    const digits = phoneNumber.replace(/\D/g, "");
+    let formatted: string;
+    if (digits.startsWith("254")) {
+      formatted = digits;             // already has country code
+    } else if (digits.startsWith("0")) {
+      formatted = "254" + digits.slice(1); // 0712... → 254712...
+    } else {
+      formatted = "254" + digits;     // 712... → 254712...
+    }
+    const pushRes = await fetch("/api/mpesa/stkpush", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phoneNumber: formatted, amount: amount }),
+    });
+    const push = await pushRes.json();
 
-    // Simulate success (in production, you'd poll for the transaction status)
-    setStatus("success");
-    setIsProcessing(false);
+    if (!push.success) {
+      setStatus("error");
+      setIsProcessing(false);
+      return;
+    }
 
-    // Wait a moment before redirecting
-    setTimeout(() => {
-      onSuccess();
-    }, 2000);
+    // 2. Poll for status every 3 seconds (up to 30s)
+    const checkoutRequestId = push.checkoutRequestId;
+    let attempts = 0;
+
+    const poll = setInterval(async () => {
+      attempts++;
+      if (attempts > 10) {
+        clearInterval(poll);
+        setStatus("error");
+        setIsProcessing(false);
+        return;
+      }
+
+      const statusRes = await fetch("/api/mpesa/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ checkoutRequestId }),
+      });
+      const statusData = await statusRes.json();
+
+      if (statusData.ResultCode === "0" || statusData.ResultCode === 0) {
+        clearInterval(poll);
+        setStatus("success");
+        setIsProcessing(false);
+        setTimeout(() => onSuccess(), 2000);
+      } else if (
+        statusData.ResultCode !== undefined &&
+        statusData.ResultCode !== "1032" &&
+        statusData.ResultCode !== 1032 &&
+        statusData.ResultCode !== "4999" &&
+        statusData.ResultCode !== 4999
+      ) {
+        // Non-pending error
+        clearInterval(poll);
+        setStatus("error");
+        setIsProcessing(false);
+      }
+      // ResultCode 1032 / 4999 = still processing, keep polling
+    }, 13000);
   };
 
   const formatPhoneNumber = (value: string) => {
@@ -111,6 +160,21 @@ export default function MpesaPayment({
               {formatPrice(amount + 300)}
             </span>
           </p>
+        </div>
+      ) : status === "error" ? (
+        <div className="text-center py-8">
+          <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </div>
+          <h4 className="text-lg font-semibold text-foreground mb-2">Payment Failed</h4>
+          <p className="text-muted-foreground mb-6">
+            The payment was cancelled or timed out. Please try again.
+          </p>
+          <Button onClick={() => { setStatus("idle"); setIsProcessing(false); }}>
+            Try Again
+          </Button>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="space-y-6">
