@@ -109,8 +109,8 @@ export async function createContactMessage(messageData: ContactMessageInsert) {
       return { success: false, error: error.message };
     }
 
-    // ── Send emails (non-blocking) ──────────────────────────────────────────
-    void Promise.all([
+    // ── Send emails ─────────────────────────────────────────────────────────
+    Promise.all([
       // Confirmation to sender
       sendEmail({
         to: messageData.email,
@@ -134,7 +134,7 @@ export async function createContactMessage(messageData: ContactMessageInsert) {
           message: messageData.message,
         }),
       }),
-    ]);
+    ]).catch((err) => console.error('[Contact email] Failed to send:', err));
 
     return { success: true, data };
   } catch (error) {

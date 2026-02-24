@@ -49,12 +49,14 @@ export default function WelcomeEmail({ firstName, email }: WelcomeEmailProps) {
           </Section>
 
           {/* Email confirmation notice */}
-          <Section style={confirmationBanner}>
-            <Text style={confirmationText}>
-              📬 <strong>One more step:</strong> Check your inbox for a confirmation email
-              from <strong>Supabase</strong> and click the link inside to verify your email
-              address. Can&apos;t find it? Check your spam or junk folder.
-            </Text>
+          <Section style={confirmationBannerWrapper}>
+            <Section style={confirmationBanner}>
+              <Text style={confirmationText}>
+                📬 <strong>One more step:</strong> Check your inbox for a confirmation email
+                from <strong>Supabase</strong> and click the link inside to verify your email
+                address. Can&apos;t find it? Check your spam or junk folder.
+              </Text>
+            </Section>
           </Section>
 
           <Hr style={divider} />
@@ -165,11 +167,14 @@ const heroText: React.CSSProperties = {
   margin: '0',
 };
 
+const confirmationBannerWrapper: React.CSSProperties = {
+  padding: '0 32px 8px',
+};
+
 const confirmationBanner: React.CSSProperties = {
   backgroundColor: '#fff8e1',
   border: '1px solid #ffe082',
   borderRadius: '8px',
-  margin: '0 32px 8px',
   padding: '16px 20px',
 };
 

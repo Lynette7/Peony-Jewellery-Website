@@ -95,22 +95,17 @@ export default function AdminContactNotification({
           {/* Quick reply */}
           <Section style={actionSection}>
             <Text style={actionLabel}>Reply quickly:</Text>
-            <Text style={actionLinks}>
-              <Link href={`mailto:${senderEmail}?subject=Re: ${encodeURIComponent(subject)}`} style={actionButton}>
-                ✉️ Reply by Email
+            <Link href={`mailto:${senderEmail}?subject=Re: ${encodeURIComponent(subject)}`} style={actionButton}>
+              ✉️ Reply by Email
+            </Link>
+            {senderPhone && (
+              <Link
+                href={`https://wa.me/${senderPhone.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(senderName.split(' ')[0])}%2C%20thanks%20for%20reaching%20out%20to%20Peony%20HQ!%20`}
+                style={{ ...actionButton, backgroundColor: '#25D366', marginLeft: '12px' }}
+              >
+                📱 WhatsApp
               </Link>
-              {senderPhone && (
-                <>
-                  {'   '}
-                  <Link
-                    href={`https://wa.me/${senderPhone.replace(/\D/g, '')}?text=Hi%20${encodeURIComponent(senderName.split(' ')[0])}%2C%20thanks%20for%20reaching%20out%20to%20Peony%20HQ!%20`}
-                    style={{ ...actionButton, backgroundColor: '#25D366' }}
-                  >
-                    📱 WhatsApp
-                  </Link>
-                </>
-              )}
-            </Text>
+            )}
           </Section>
         </Container>
       </Body>
@@ -217,10 +212,6 @@ const actionLabel: React.CSSProperties = {
   textTransform: 'uppercase' as const,
   letterSpacing: '0.04em',
   margin: '0 0 8px',
-};
-
-const actionLinks: React.CSSProperties = {
-  margin: '0',
 };
 
 const actionButton: React.CSSProperties = {
