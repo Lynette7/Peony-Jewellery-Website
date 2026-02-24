@@ -8,7 +8,7 @@ export const ADMIN_EMAIL = process.env.ADMIN_EMAIL ?? 'peonyhqkenya@gmail.com';
 export const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://peonyhq.co.ke';
 // Logo URL for emails — must be a publicly accessible URL (not localhost).
 // Defaults to the production domain so it always works once deployed.
-export const EMAIL_LOGO_URL = process.env.EMAIL_LOGO_URL ?? 'https://peonyhq.co.ke/logo-light.svg';
+export const EMAIL_LOGO_URL = process.env.EMAIL_LOGO_URL ?? 'https://peonyhq.co.ke/logo-email.png';
 
 export interface SendEmailOptions {
   to: string | string[];

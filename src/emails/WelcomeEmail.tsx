@@ -30,9 +30,13 @@ export default function WelcomeEmail({ firstName, email }: WelcomeEmailProps) {
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Text style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '20px', fontWeight: 'bold', color: '#82001a', textAlign: 'center', margin: '0', letterSpacing: '3px' }}>
-              🌸 PEONY HQ KENYA
-            </Text>
+            <Img
+              src={EMAIL_LOGO_URL}
+              alt="Peony HQ Kenya"
+              width={150}
+              height={50}
+              style={{ margin: '0 auto', display: 'block' }}
+            />
           </Section>
 
           {/* Hero */}
@@ -41,6 +45,15 @@ export default function WelcomeEmail({ firstName, email }: WelcomeEmailProps) {
             <Text style={heroText}>
               We&apos;re so glad you&apos;re here. Your account is ready and you now have
               access to your personal wishlist, order history, and exclusive member perks.
+            </Text>
+          </Section>
+
+          {/* Email confirmation notice */}
+          <Section style={confirmationBanner}>
+            <Text style={confirmationText}>
+              📬 <strong>One more step:</strong> Check your inbox for a confirmation email
+              from <strong>Supabase</strong> and click the link inside to verify your email
+              address. Can&apos;t find it? Check your spam or junk folder.
             </Text>
           </Section>
 
@@ -149,6 +162,21 @@ const heroText: React.CSSProperties = {
   color: '#444',
   fontSize: '16px',
   lineHeight: '1.7',
+  margin: '0',
+};
+
+const confirmationBanner: React.CSSProperties = {
+  backgroundColor: '#fff8e1',
+  border: '1px solid #ffe082',
+  borderRadius: '8px',
+  margin: '0 32px 8px',
+  padding: '16px 20px',
+};
+
+const confirmationText: React.CSSProperties = {
+  color: '#5d4037',
+  fontSize: '14px',
+  lineHeight: '1.6',
   margin: '0',
 };
 

@@ -27,9 +27,13 @@ export default function NewsletterConfirmation({ email }: NewsletterConfirmation
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Text style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '20px', fontWeight: 'bold', color: '#82001a', textAlign: 'center', margin: '0', letterSpacing: '3px' }}>
-              🌸 PEONY HQ KENYA
-            </Text>
+            <Img
+              src={EMAIL_LOGO_URL}
+              alt="Peony HQ Kenya"
+              width={150}
+              height={50}
+              style={{ margin: '0 auto', display: 'block' }}
+            />
           </Section>
 
           {/* Hero */}
