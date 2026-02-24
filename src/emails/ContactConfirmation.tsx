@@ -36,13 +36,9 @@ export default function ContactConfirmation({
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Img
-              src={EMAIL_LOGO_URL}
-              alt="Peony HQ Kenya"
-              width={120}
-              height={40}
-              style={{ margin: '0 auto', display: 'block' }}
-            />
+            <Text style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '20px', fontWeight: 'bold', color: '#82001a', textAlign: 'center', margin: '0', letterSpacing: '3px' }}>
+              🌸 PEONY HQ KENYA
+            </Text>
           </Section>
 
           {/* Hero */}

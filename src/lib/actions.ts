@@ -278,21 +278,18 @@ export async function getCategoryCoverImages(): Promise<Record<string, string>> 
     const categories = ['earrings', 'necklaces', 'rings', 'bracelets', 'sets'];
     const coverImages: Record<string, string> = {};
 
-    for (const category of categories) {
-      const { data, error } = await supabase
-        .from('products')
-        .select('image')
-        .eq('category', category)
-        .limit(1)
-        .single();
+    await Promise.all(
+      categories.map(async (category) => {
+        const { data } = await supabase
+          .from('products')
+          .select('image')
+          .eq('category', category)
+          .limit(1)
+          .maybeSingle();
 
-      if (error || !data) {
-        console.warn(`No image found for category ${category}, using fallback`);
-        coverImages[category] = '';
-      } else {
-        coverImages[category] = data.image;
-      }
-    }
+        coverImages[category] = data?.image ?? '';
+      })
+    );
 
     return coverImages;
   } catch (error) {

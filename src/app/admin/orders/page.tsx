@@ -315,10 +315,14 @@ export default function AdminOrdersPage() {
                       name: string;
                       quantity: number;
                       price: number;
+                      variant?: string | null;
                     }>).map((item, index) => (
                       <div key={index} className="p-4 flex justify-between">
                         <div>
                           <p className="font-medium text-[#fcfbf9]">{item.name}</p>
+                          {item.variant && (
+                            <p className="text-xs text-[#f8dae2]/70 mt-0.5">Variant: {item.variant}</p>
+                          )}
                           <p className="text-sm text-[#f8dae2]">Qty: {item.quantity}</p>
                         </div>
                         <p className="font-medium text-[#fcfbf9]">

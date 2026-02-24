@@ -30,13 +30,9 @@ export default function WelcomeEmail({ firstName, email }: WelcomeEmailProps) {
         <Container style={container}>
           {/* Header */}
           <Section style={header}>
-            <Img
-              src={EMAIL_LOGO_URL}
-              alt="Peony HQ Kenya"
-              width={120}
-              height={40}
-              style={{ margin: '0 auto', display: 'block' }}
-            />
+            <Text style={{ fontFamily: 'Georgia, "Times New Roman", serif', fontSize: '20px', fontWeight: 'bold', color: '#82001a', textAlign: 'center', margin: '0', letterSpacing: '3px' }}>
+              🌸 PEONY HQ KENYA
+            </Text>
           </Section>
 
           {/* Hero */}
@@ -98,8 +94,8 @@ export default function WelcomeEmail({ firstName, email }: WelcomeEmailProps) {
                 WhatsApp
               </Link>{' '}
               or email{' '}
-              <Link href="mailto:hello@peonyhq.co.ke" style={link}>
-                hello@peonyhq.co.ke
+              <Link href="mailto:peonyhqkenya@gmail.com" style={link}>
+                peonyhqkenya@gmail.com
               </Link>
             </Text>
             <Text style={footerText}>
