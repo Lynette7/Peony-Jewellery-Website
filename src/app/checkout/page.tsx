@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import { useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle } from 'lucide-react';
@@ -10,6 +10,8 @@ import Button from '@/components/ui/Button';
 import MpesaPayment from '@/components/checkout/MpesaPayment';
 import CardPayment from '@/components/checkout/CardPayment';
 import { createOrder } from '@/lib/actions';
+import CityDropdown from '@/components/ui/CityDropdown';
+import { getShippingFee } from '@/data/shipping';
 
 type PaymentMethod = 'mpesa' | 'card';
 type CheckoutStep = 'info' | 'payment' | 'confirmation';
@@ -29,6 +31,9 @@ export default function CheckoutPage() {
   });
   const [orderError, setOrderError] = useState('');
 
+  // Synchronous — computed directly from the selected city
+  const shippingFee = formData.city ? getShippingFee(formData.city) : null;
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -41,8 +46,7 @@ export default function CheckoutPage() {
 
   const handlePaymentSuccess = async () => {
     setOrderError('');
-    
-    // Create order in database
+
     const orderItems = items.map((item) => ({
       id: item.product.id,
       name: item.selectedVariant
@@ -61,7 +65,7 @@ export default function CheckoutPage() {
       address: formData.address,
       city: formData.city,
       postal_code: formData.postalCode,
-      total: getCartTotal(),
+      total: getCartTotal() + (shippingFee ?? 0),
       items: orderItems,
       payment_method: paymentMethod,
     });
@@ -74,6 +78,8 @@ export default function CheckoutPage() {
       console.error('Order creation failed:', result.error);
     }
   };
+
+  const orderTotal = getCartTotal() + (shippingFee ?? 0);
 
   // Redirect to cart if empty
   if (items.length === 0 && step !== 'confirmation') {
@@ -102,8 +108,8 @@ export default function CheckoutPage() {
           </div>
           <h1 className="text-3xl font-bold text-foreground mb-4">Order Confirmed!</h1>
           <p className="text-muted-foreground mb-8">
-            Thank you for your order, {formData.firstName}! We&apos;ve sent a confirmation email to {formData.email}. 
-            You&apos;ll receive updates about your delivery soon.
+            Thank you for your order, {formData.firstName}! We&apos;ve sent a confirmation
+            email to {formData.email}. You&apos;ll receive updates about your delivery soon.
           </p>
           <Link href="/shop">
             <Button size="lg">Continue Shopping</Button>
@@ -118,7 +124,6 @@ export default function CheckoutPage() {
       {/* Header */}
       <div className="bg-muted/30 py-8">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Back Button */}
           <Link
             href="/cart"
             className="inline-flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors mb-4"
@@ -136,7 +141,7 @@ export default function CheckoutPage() {
           <div className="flex items-center space-x-4">
             <div className={`flex items-center space-x-2 ${step === 'info' ? 'text-primary' : 'text-muted-foreground'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center font-medium ${
-                step === 'info' ? 'bg-primary text-background' : step === 'payment' ? 'bg-primary text-background' : 'bg-muted'
+                step === 'info' || step === 'payment' ? 'bg-primary text-background' : 'bg-muted'
               }`}>
                 1
               </div>
@@ -241,17 +246,15 @@ export default function CheckoutPage() {
                     </div>
                     <div className="grid sm:grid-cols-2 gap-4">
                       <div>
-                        <label htmlFor="city" className="block text-sm font-medium text-foreground mb-2">
-                          City *
+                        <label className="block text-sm font-medium text-foreground mb-2">
+                          City / Town *
                         </label>
-                        <input
-                          type="text"
-                          id="city"
-                          name="city"
+                        <CityDropdown
                           value={formData.city}
-                          onChange={handleInputChange}
+                          onChange={(city) =>
+                            setFormData((prev) => ({ ...prev, city }))
+                          }
                           required
-                          className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
                       <div>
@@ -271,7 +274,12 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <Button type="submit" fullWidth size="lg">
+                <Button
+                  type="submit"
+                  fullWidth
+                  size="lg"
+                  disabled={!formData.city}
+                >
                   Continue to Payment
                 </Button>
               </form>
@@ -326,13 +334,13 @@ export default function CheckoutPage() {
                 {/* Payment Form */}
                 {paymentMethod === 'mpesa' ? (
                   <MpesaPayment
-                    amount={getCartTotal()}
+                    amount={orderTotal}
                     onSuccess={handlePaymentSuccess}
                     onBack={() => setStep('info')}
                   />
                 ) : (
                   <CardPayment
-                    amount={getCartTotal()}
+                    amount={orderTotal}
                     onSuccess={handlePaymentSuccess}
                     onBack={() => setStep('info')}
                   />
@@ -353,13 +361,17 @@ export default function CheckoutPage() {
                     ? `${item.product.id}::${item.selectedVariant.name}`
                     : item.product.id;
                   const displayImage = item.selectedVariant?.image || item.product.image;
-                  
+
                   return (
                     <div key={itemKey} className="flex items-center space-x-3">
                       <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                         <Image
                           src={displayImage}
-                          alt={item.selectedVariant ? `${item.product.name} - ${item.selectedVariant.name}` : item.product.name}
+                          alt={
+                            item.selectedVariant
+                              ? `${item.product.name} - ${item.selectedVariant.name}`
+                              : item.product.name
+                          }
                           fill
                           className="object-cover"
                           sizes="64px"
@@ -394,15 +406,22 @@ export default function CheckoutPage() {
                   <span className="text-muted-foreground">Subtotal</span>
                   <span className="text-foreground">{formatPrice(getCartTotal())}</span>
                 </div>
-                <div className="flex justify-between text-sm">
+                <div className="flex justify-between text-sm items-center">
                   <span className="text-muted-foreground">Shipping</span>
-                  <span className="text-foreground">KES 300</span>
+                  <span className="text-foreground">
+                    {shippingFee !== null
+                      ? formatPrice(shippingFee)
+                      : <span className="text-muted-foreground italic text-xs">Select a city</span>
+                    }
+                  </span>
                 </div>
                 <div className="border-t border-border pt-3">
                   <div className="flex justify-between">
                     <span className="font-semibold text-foreground">Total</span>
                     <span className="text-xl font-bold text-primary">
-                      {formatPrice(getCartTotal() + 300)}
+                      {shippingFee !== null
+                        ? formatPrice(orderTotal)
+                        : formatPrice(getCartTotal())}
                     </span>
                   </div>
                 </div>
