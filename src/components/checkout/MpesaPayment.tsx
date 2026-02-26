@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from "react";
-import Image from "next/image";
 import { ArrowLeft, CheckCircle } from "lucide-react";
 import { formatPrice } from "@/data/products";
 import Button from "@/components/ui/Button";
@@ -58,7 +57,7 @@ export default function MpesaPayment({
             M-Pesa Payment
           </h3>
           <p className="text-sm text-muted-foreground">
-            Scan QR code or pay directly to till number
+            Pay directly to till number
           </p>
         </div>
       </div>
@@ -73,18 +72,8 @@ export default function MpesaPayment({
         </div>
       </div>
 
-      {/* QR Code + Till */}
-      <div className="flex flex-col items-center space-y-4">
-        <div className="relative w-52 h-52 rounded-xl overflow-hidden border border-border">
-          <Image
-            src="/mpesa-till-qr.png"
-            alt="M-Pesa Till QR Code"
-            fill
-            className="object-contain"
-            sizes="208px"
-          />
-        </div>
-
+      {/* Till */}
+      <div className="flex flex-col items-center space-y-2">
         <div className="text-center">
           <p className="text-sm text-muted-foreground mb-1">Till Number</p>
           <p className="text-3xl font-bold text-foreground tracking-widest">
@@ -100,7 +89,7 @@ export default function MpesaPayment({
       <ol className="space-y-2 text-sm text-muted-foreground list-decimal list-inside bg-muted/30 rounded-xl p-4">
         <li>Open M-Pesa on your phone</li>
         <li>Select <span className="font-medium text-foreground">Lipa na M-Pesa</span> → <span className="font-medium text-foreground">Buy Goods and Services</span></li>
-        <li>Enter till number <span className="font-medium text-foreground">{TILL_NUMBER}</span> or scan the QR code</li>
+        <li>Enter till number <span className="font-medium text-foreground">{TILL_NUMBER}</span></li>
         <li>Enter amount <span className="font-medium text-foreground">{formatPrice(total)}</span></li>
         <li>Enter your M-Pesa PIN and confirm</li>
       </ol>

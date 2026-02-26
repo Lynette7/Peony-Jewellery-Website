@@ -11,7 +11,7 @@ import NewsletterConfirmation from '@/emails/NewsletterConfirmation';
 import ContactConfirmation from '@/emails/ContactConfirmation';
 import AdminContactNotification from '@/emails/AdminContactNotification';
 
-export async function createOrder(orderData: OrderInsert, mpesaCode?: string) {
+export async function createOrder(orderData: OrderInsert, mpesaCode?: string, shippingFee = 0) {
   try {
     const supabase = await createClient();
     
@@ -43,45 +43,31 @@ export async function createOrder(orderData: OrderInsert, mpesaCode?: string) {
       image: string; variant?: string | null;
     }[]) : [];
 
-    const shipping = 300;
-    const subtotal = orderData.total;
-    const total = subtotal + shipping;
+    const shipping = shippingFee;
+    const subtotal = orderData.total - shipping;
+    const total = orderData.total;
 
     const customerName = orderData.customer_name;
     const customerEmail = orderData.customer_email;
     const orderId = data.id as string;
 
-    // Save/update delivery address for logged-in users (non-blocking)
+    // Auto-save delivery address only for first-time buyers (no existing addresses)
     if (user?.id) {
       void (async () => {
-        const { data: existingDefault } = await supabase
+        const { count } = await supabase
           .from('user_addresses')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('is_default', true)
-          .maybeSingle();
+          .select('id', { count: 'exact', head: true })
+          .eq('user_id', user.id);
 
-        if (existingDefault) {
-          await supabase
-            .from('user_addresses')
-            .update({
-              address: orderData.address,
-              city: orderData.city ?? '',
-              postal_code: orderData.postal_code || null,
-              updated_at: new Date().toISOString(),
-            })
-            .eq('id', existingDefault.id);
-        } else {
-          await supabase
-            .from('user_addresses')
-            .insert({
-              user_id: user.id,
-              address: orderData.address,
-              city: orderData.city ?? '',
-              postal_code: orderData.postal_code || null,
-              country: 'Kenya',
-              is_default: true,
-            });
+        if ((count ?? 0) === 0) {
+          await supabase.from('user_addresses').insert({
+            user_id: user.id,
+            address: orderData.address,
+            city: orderData.city ?? '',
+            postal_code: orderData.postal_code || null,
+            country: 'Kenya',
+            is_default: true,
+          });
         }
       })();
     }

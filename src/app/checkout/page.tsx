@@ -3,7 +3,8 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowLeft, CheckCircle } from 'lucide-react';
+import { ArrowLeft, CheckCircle, MapPin, Plus, Star } from 'lucide-react';
+import { UserAddress } from '@/types/database';
 import { useCart } from '@/contexts/CartContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
@@ -34,27 +35,47 @@ export default function CheckoutPage() {
     postalCode: '',
   });
   const [orderError, setOrderError] = useState('');
+  const [savedAddresses, setSavedAddresses] = useState<UserAddress[]>([]);
+  const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
 
-  // Pre-fill address from saved default for logged-in users
+  // Pre-fill contact info and addresses for logged-in users
   useEffect(() => {
-    async function prefillAddress() {
+    async function prefillUserData() {
       if (!user) return;
-      const { data } = await supabase
-        .from('user_addresses')
-        .select('address, city, postal_code')
-        .eq('user_id', user.id)
-        .eq('is_default', true)
-        .maybeSingle();
-      if (data) {
+      const [{ data: profile }, { data: addresses }] = await Promise.all([
+        supabase
+          .from('user_profiles')
+          .select('first_name, last_name, phone')
+          .eq('id', user.id)
+          .maybeSingle(),
+        supabase
+          .from('user_addresses')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('is_default', { ascending: false }),
+      ]);
+
+      setFormData((prev) => ({
+        ...prev,
+        email: user.email || prev.email,
+        firstName: profile?.first_name || prev.firstName,
+        lastName: profile?.last_name || prev.lastName,
+        phone: profile?.phone || prev.phone,
+      }));
+
+      if (addresses && addresses.length > 0) {
+        setSavedAddresses(addresses);
+        const defaultAddr = addresses.find((a) => a.is_default) ?? addresses[0];
+        setSelectedAddressId(defaultAddr.id);
         setFormData((prev) => ({
           ...prev,
-          address: data.address,
-          city: data.city,
-          postalCode: data.postal_code || '',
+          address: defaultAddr.address,
+          city: defaultAddr.city,
+          postalCode: defaultAddr.postal_code || '',
         }));
       }
     }
-    prefillAddress();
+    prefillUserData();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -98,6 +119,7 @@ export default function CheckoutPage() {
         payment_method: paymentMethod,
       },
       mpesaCode,
+      shippingFee ?? 0,
     );
 
     if (result.success) {
@@ -259,56 +281,121 @@ export default function CheckoutPage() {
 
                 <div className="bg-card border border-border rounded-2xl p-6">
                   <h2 className="text-xl font-semibold text-foreground mb-6">Delivery Address</h2>
-                  <div className="space-y-4">
-                    <div>
-                      <label htmlFor="address" className="block text-sm font-medium text-foreground mb-2">
-                        Street Address *
-                      </label>
-                      <input
-                        type="text"
-                        id="address"
-                        name="address"
-                        value={formData.address}
-                        onChange={handleInputChange}
-                        required
-                        className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
+
+                  {/* Saved address picker for logged-in users */}
+                  {user && savedAddresses.length > 0 && (
+                    <div className="space-y-3 mb-4">
+                      {savedAddresses.map((addr) => (
+                        <button
+                          key={addr.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedAddressId(addr.id);
+                            setFormData((prev) => ({
+                              ...prev,
+                              address: addr.address,
+                              city: addr.city,
+                              postalCode: addr.postal_code || '',
+                            }));
+                          }}
+                          className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                            selectedAddressId === addr.id
+                              ? 'border-primary bg-primary/5'
+                              : 'border-border hover:border-muted-foreground'
+                          }`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex items-start space-x-3">
+                              <MapPin className="text-primary mt-0.5 flex-shrink-0" size={16} />
+                              <div>
+                                <p className="font-medium text-foreground text-sm">{addr.address}</p>
+                                <p className="text-xs text-muted-foreground">
+                                  {addr.city}{addr.postal_code ? `, ${addr.postal_code}` : ''}
+                                </p>
+                              </div>
+                            </div>
+                            {addr.is_default && (
+                              <span className="inline-flex items-center space-x-1 text-xs font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-full flex-shrink-0">
+                                <Star size={10} fill="currentColor" />
+                                <span>Default</span>
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      ))}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedAddressId('new');
+                          setFormData((prev) => ({ ...prev, address: '', city: '', postalCode: '' }));
+                        }}
+                        className={`w-full p-4 rounded-xl border-2 text-left transition-all ${
+                          selectedAddressId === 'new'
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-muted-foreground'
+                        }`}
+                      >
+                        <div className="flex items-center space-x-2 text-muted-foreground">
+                          <Plus size={16} />
+                          <span className="text-sm font-medium">Use a different address</span>
+                        </div>
+                      </button>
                     </div>
-                    <div className="grid sm:grid-cols-2 gap-4">
+                  )}
+
+                  {/* Manual form — always shown for guests, shown when 'new' selected */}
+                  {(!user || savedAddresses.length === 0 || selectedAddressId === 'new') && (
+                    <div className="space-y-4">
                       <div>
-                        <label className="block text-sm font-medium text-foreground mb-2">
-                          City / Town *
-                        </label>
-                        <CityDropdown
-                          value={formData.city}
-                          onChange={(city) =>
-                            setFormData((prev) => ({ ...prev, city }))
-                          }
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label htmlFor="postalCode" className="block text-sm font-medium text-foreground mb-2">
-                          Postal Code
+                        <label htmlFor="address" className="block text-sm font-medium text-foreground mb-2">
+                          Street Address *
                         </label>
                         <input
                           type="text"
-                          id="postalCode"
-                          name="postalCode"
-                          value={formData.postalCode}
+                          id="address"
+                          name="address"
+                          value={formData.address}
                           onChange={handleInputChange}
+                          required
                           className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                         />
                       </div>
+                      <div className="grid sm:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-foreground mb-2">
+                            City / Town *
+                          </label>
+                          <CityDropdown
+                            value={formData.city}
+                            onChange={(city) =>
+                              setFormData((prev) => ({ ...prev, city }))
+                            }
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="postalCode" className="block text-sm font-medium text-foreground mb-2">
+                            Postal Code
+                          </label>
+                          <input
+                            type="text"
+                            id="postalCode"
+                            name="postalCode"
+                            value={formData.postalCode}
+                            onChange={handleInputChange}
+                            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                          />
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
 
                 <Button
                   type="submit"
                   fullWidth
                   size="lg"
-                  disabled={!formData.city}
+                  disabled={!formData.city || !formData.address}
                 >
                   Continue to Payment
                 </Button>
@@ -322,52 +409,11 @@ export default function CheckoutPage() {
                     {orderError}
                   </div>
                 )}
-                {/* Payment Method Selection */}
-                <div className="bg-card border border-border rounded-2xl p-6">
-                  <h2 className="text-xl font-semibold text-foreground mb-6">Payment Method</h2>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    <button
-                      onClick={() => setPaymentMethod('mpesa')}
-                      className={`p-4 rounded-xl border-2 transition-all duration-200 flex items-center space-x-4 ${
-                        paymentMethod === 'mpesa'
-                          ? 'border-primary bg-primary/5'
-                          : 'border-border hover:border-muted-foreground'
-                      }`}
-                    >
-                      <div className="w-12 h-12 bg-green-500 rounded-lg flex items-center justify-center text-white font-bold">
-                        M
-                      </div>
-                      <div className="text-left">
-                        <p className="font-semibold text-foreground">M-Pesa</p>
-                        <p className="text-sm text-muted-foreground">Pay with mobile money</p>
-                      </div>
-                    </button>
-                    <div className="p-4 rounded-xl border-2 border-border flex items-center space-x-4 opacity-50 cursor-not-allowed">
-                      <div className="w-12 h-12 bg-blue-400 rounded-lg flex items-center justify-center text-white font-bold">
-                        $
-                      </div>
-                      <div className="text-left">
-                        <p className="font-semibold text-foreground">Card</p>
-                        <p className="text-sm text-muted-foreground">Coming soon</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Payment Form */}
-                {paymentMethod === 'mpesa' ? (
-                  <MpesaPayment
-                    amount={orderTotal}
-                    onSuccess={handlePaymentSuccess}
-                    onBack={() => setStep('info')}
-                  />
-                ) : (
-                  <CardPayment
-                    amount={orderTotal}
-                    onSuccess={handlePaymentSuccess}
-                    onBack={() => setStep('info')}
-                  />
-                )}
+                <MpesaPayment
+                  amount={orderTotal}
+                  onSuccess={handlePaymentSuccess}
+                  onBack={() => setStep('info')}
+                />
               </div>
             )}
           </div>

@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, CheckCircle, Clock } from 'lucide-react';
+import { ArrowLeft, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
 const TILL_NUMBER = '3238987';
@@ -77,26 +77,6 @@ export default function PaymentMethodsPage() {
           </div>
         </div>
 
-        {/* Card — coming soon */}
-        <div className="bg-card border border-border rounded-2xl p-6 opacity-60">
-          <div className="flex items-start justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-14 h-14 bg-blue-400 rounded-xl flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-xl">$</span>
-              </div>
-              <div>
-                <div className="flex items-center space-x-2 mb-1">
-                  <h3 className="font-semibold text-foreground">Card Payment</h3>
-                  <span className="inline-flex items-center space-x-1 text-xs font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                    <Clock size={10} />
-                    <span>Coming soon</span>
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground">Visa, Mastercard, Amex</p>
-              </div>
-            </div>
-          </div>
-        </div>
 
       </div>
     </div>
