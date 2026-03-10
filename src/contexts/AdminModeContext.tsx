@@ -59,7 +59,7 @@ export function AdminModeProvider({ children }: { children: React.ReactNode }) {
     checkAdminStatus();
 
     // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event: string, session: { user?: { id: string } } | null) => {
       if (session?.user) {
         const { data: profile } = await supabase
           .from('user_profiles')

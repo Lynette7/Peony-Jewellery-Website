@@ -65,7 +65,7 @@ export default function CheckoutPage() {
 
       if (addresses && addresses.length > 0) {
         setSavedAddresses(addresses);
-        const defaultAddr = addresses.find((a) => a.is_default) ?? addresses[0];
+        const defaultAddr = addresses.find((a: UserAddress) => a.is_default) ?? addresses[0];
         setSelectedAddressId(defaultAddr.id);
         setFormData((prev) => ({
           ...prev,

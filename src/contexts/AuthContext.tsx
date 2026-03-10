@@ -44,7 +44,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     getInitialSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (_event: string, session: { user?: { id: string; email?: string } } | null) => {
         if (session?.user) {
           setUser({
             id: session.user.id,
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     // Clear local state immediately so the UI responds right away
     setUser(null);
     // Invalidate the server session in the background
-    supabase.auth.signOut().catch(err => console.error('Error signing out:', err));
+    supabase.auth.signOut().catch((err: unknown) => console.error('Error signing out:', err));
   }, [supabase]);
 
   const updateProfile = useCallback(async (data: {
@@ -144,7 +144,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         first_name: data.firstName,
         last_name: data.lastName,
       },
-    }).catch(err => console.error('Auth metadata sync failed:', err));
+    }).catch((err: unknown) => console.error('Auth metadata sync failed:', err));
   }, [supabase, user]);
 
   const value: AuthContextType = {
