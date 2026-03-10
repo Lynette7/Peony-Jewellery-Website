@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useMemo } from 'react';
 import { createClient } from '@/lib/supabase/client';
 
 interface AdminModeContextType {
@@ -17,7 +17,7 @@ export function AdminModeProvider({ children }: { children: React.ReactNode }) {
   const [isAdmin, setIsAdmin] = useState(false);
   const [isCustomerMode, setIsCustomerMode] = useState(false);
   const [loading, setLoading] = useState(true);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   useEffect(() => {
     async function checkAdminStatus() {

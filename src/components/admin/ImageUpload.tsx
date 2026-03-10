@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useMemo } from 'react';
 import { Upload, X, Loader2, Image as ImageIcon, Link as LinkIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 
@@ -23,7 +23,7 @@ export default function ImageUpload({
   const [uploadMode, setUploadMode] = useState<'upload' | 'url'>('upload');
   const [urlInput, setUrlInput] = useState('');
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

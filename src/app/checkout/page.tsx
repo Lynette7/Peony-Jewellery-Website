@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowLeft, CheckCircle, MapPin, Plus, Star } from 'lucide-react';
@@ -22,7 +22,7 @@ type CheckoutStep = 'info' | 'payment' | 'confirmation';
 export default function CheckoutPage() {
   const { items, getCartTotal, clearCart } = useCart();
   const { user } = useAuth();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const [step, setStep] = useState<CheckoutStep>('info');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('mpesa');
   const [formData, setFormData] = useState({

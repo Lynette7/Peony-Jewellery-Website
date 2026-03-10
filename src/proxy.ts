@@ -9,15 +9,13 @@ export async function proxy(request: NextRequest) {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
-  // Only run Supabase auth logic for admin routes
-  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
-
-  if (!isAdminRoute) {
-    return supabaseResponse;
-  }
-
   if (!supabaseUrl || !supabaseAnonKey) {
-    return NextResponse.redirect(new URL('/admin/login', request.url));
+    // Only block admin routes if env vars are missing
+    const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+    if (isAdminRoute && request.nextUrl.pathname !== '/admin/login') {
+      return NextResponse.redirect(new URL('/admin/login', request.url));
+    }
+    return supabaseResponse;
   }
 
   const supabase = createServerClient(
@@ -43,13 +41,21 @@ export async function proxy(request: NextRequest) {
     }
   );
 
-  // Get user - single auth call per request
+  // Refresh the session on every request — this keeps auth tokens alive
+  // and prevents the progressive session degradation
   let user = null;
   try {
     const { data: { user: authUser } } = await supabase.auth.getUser();
     user = authUser;
   } catch (error) {
     console.error('Error getting user in proxy:', error);
+  }
+
+  // Admin route protection
+  const isAdminRoute = request.nextUrl.pathname.startsWith('/admin');
+
+  if (!isAdminRoute) {
+    return supabaseResponse;
   }
 
   // Login page: redirect to admin if already authenticated

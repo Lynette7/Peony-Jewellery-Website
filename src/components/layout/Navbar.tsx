@@ -126,7 +126,7 @@ export default function Navbar() {
             </Link>
 
             {/* Account / Login */}
-            {!authLoading && (
+            {mounted && !authLoading && (
               <>
                 {user ? (
                   <div className="relative">

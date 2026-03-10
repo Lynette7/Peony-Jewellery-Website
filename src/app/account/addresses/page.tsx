@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -19,7 +19,7 @@ const emptyForm: AddressForm = { address: '', city: '', postal_code: '' };
 export default function AddressesPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
 
   const [addresses, setAddresses] = useState<UserAddress[]>([]);
   const [isLoading, setIsLoading] = useState(true);
