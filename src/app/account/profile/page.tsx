@@ -3,7 +3,10 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Save, User, Mail, Phone, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
+import {
+  ArrowLeft, User, Mail, Phone, Loader2, CheckCircle,
+  AlertCircle, Camera, Shield, Clock,
+} from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { saveUserProfile } from '@/lib/actions';
@@ -14,15 +17,15 @@ export default function ProfilePage() {
   const { user, loading: authLoading, updateProfile } = useAuth();
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState(false);
+  const [savedField, setSavedField] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
   });
+  const [memberSince, setMemberSince] = useState<string | null>(null);
   const supabase = useMemo(() => createClient(), []);
-  // Tracks what's currently persisted so we skip no-op saves
   const lastSavedRef = useRef({ firstName: '', lastName: '', phone: '' });
 
   useEffect(() => {
@@ -31,15 +34,12 @@ export default function ProfilePage() {
     }
   }, [user, authLoading, router]);
 
-  // Pre-populate email as soon as auth resolves — no DB round-trip needed
   useEffect(() => {
     if (user?.email) {
       setFormData(prev => ({ ...prev, email: user.email || '' }));
     }
   }, [user?.email]);
 
-  // Fetch name/phone from DB in the background (non-blocking).
-  // Depends on user?.id so it doesn't re-run when profile fields change.
   useEffect(() => {
     async function fetchProfile() {
       if (!user) return;
@@ -55,18 +55,26 @@ export default function ProfilePage() {
         }
 
         const rawMetaData = session?.user?.user_metadata || {};
-        const authFirstName = rawMetaData.first_name || rawMetaData.firstName || '';
-        const authLastName = rawMetaData.last_name || rawMetaData.lastName || '';
+        const createdAt = session?.user?.created_at || '';
 
         const fetched = {
-          firstName: profile?.first_name || rawMetaData.first_name || rawMetaData.firstName || authFirstName || user.firstName || '',
-          lastName: profile?.last_name || rawMetaData.last_name || rawMetaData.lastName || authLastName || user.lastName || '',
+          firstName: profile?.first_name || rawMetaData.first_name || rawMetaData.firstName || user.firstName || '',
+          lastName: profile?.last_name || rawMetaData.last_name || rawMetaData.lastName || user.lastName || '',
           email: user.email || '',
           phone: profile?.phone || user.phone || '',
         };
 
         setFormData(fetched);
         lastSavedRef.current = { firstName: fetched.firstName, lastName: fetched.lastName, phone: fetched.phone };
+        if (createdAt) {
+          setMemberSince(
+            new Date(createdAt).toLocaleDateString('en-KE', {
+              day: 'numeric',
+              month: 'long',
+              year: 'numeric',
+            })
+          );
+        }
       } catch (err) {
         console.error('Error loading profile:', err);
         setError('Failed to load profile');
@@ -78,7 +86,10 @@ export default function ProfilePage() {
     }
   }, [user?.id, supabase]);
 
-  const saveProfile = useCallback(async (data: { firstName: string; lastName: string; phone: string }) => {
+  const saveProfile = useCallback(async (
+    data: { firstName: string; lastName: string; phone: string },
+    fieldName?: string,
+  ) => {
     if (!user) return;
 
     const unchanged =
@@ -89,17 +100,15 @@ export default function ProfilePage() {
 
     setIsSaving(true);
     setError('');
-    setSuccess(false);
+    setSavedField(null);
 
     try {
-      // Update local context state immediately
       updateProfile({
         firstName: data.firstName || undefined,
         lastName: data.lastName || undefined,
         phone: data.phone || undefined,
       });
 
-      // Save to DB via server action (avoids client-side token refresh issues)
       const result = await saveUserProfile(user.id, {
         firstName: data.firstName || undefined,
         lastName: data.lastName || undefined,
@@ -109,8 +118,10 @@ export default function ProfilePage() {
       if (!result.success) throw new Error(result.error);
 
       lastSavedRef.current = { ...data };
-      setSuccess(true);
-      setTimeout(() => setSuccess(false), 3000);
+      if (fieldName) {
+        setSavedField(fieldName);
+        setTimeout(() => setSavedField(null), 2000);
+      }
     } catch (err) {
       console.error('Error saving profile:', err);
       setError(err instanceof Error ? err.message : 'Failed to save profile');
@@ -123,38 +134,52 @@ export default function ProfilePage() {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError('');
-    setSuccess(false);
+    setSavedField(null);
   };
 
-  // Auto-save when the user leaves a field
-  const handleBlur = () => {
-    saveProfile({ firstName: formData.firstName, lastName: formData.lastName, phone: formData.phone });
+  const handleBlur = (fieldName: string) => {
+    saveProfile(
+      { firstName: formData.firstName, lastName: formData.lastName, phone: formData.phone },
+      fieldName,
+    );
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    await saveProfile({ firstName: formData.firstName, lastName: formData.lastName, phone: formData.phone });
+    await saveProfile(
+      { firstName: formData.firstName, lastName: formData.lastName, phone: formData.phone },
+      'all',
+    );
   };
 
   if (authLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 mx-auto text-primary animate-spin mb-4" />
-          <p className="text-muted-foreground">Loading profile...</p>
-        </div>
+        <Loader2 className="w-8 h-8 text-primary animate-spin" />
       </div>
     );
   }
 
-  if (!user) {
-    return null;
-  }
+  if (!user) return null;
+
+  const displayName =
+    formData.firstName || formData.lastName
+      ? `${formData.firstName} ${formData.lastName}`.trim()
+      : null;
+
+  const initials =
+    formData.firstName || formData.lastName
+      ? `${(formData.firstName?.[0] || '').toUpperCase()}${(formData.lastName?.[0] || '').toUpperCase()}`
+      : formData.email?.[0]?.toUpperCase() || '?';
+
+  const inputClasses =
+    'w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary transition-shadow';
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="bg-muted/30 py-8">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      {/* Header */}
+      <div className="bg-muted/30 border-b border-border">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <Link
             href="/account"
             className="inline-flex items-center space-x-2 text-muted-foreground hover:text-primary transition-colors mb-4"
@@ -162,73 +187,141 @@ export default function ProfilePage() {
             <ArrowLeft size={20} />
             <span>Back to Account</span>
           </Link>
-          <h1 className="text-3xl font-bold text-foreground">My Profile</h1>
-          <p className="text-muted-foreground mt-2">
-            Manage your personal information
-          </p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Profile Settings</h1>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+        {/* Avatar Card */}
         <div className="bg-card border border-border rounded-2xl p-6">
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg flex items-center space-x-2 text-red-700 dark:text-red-300">
-              <AlertCircle size={18} />
-              <span>{error}</span>
-            </div>
-          )}
-
-          {success && (
-            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg flex items-center space-x-2 text-green-700 dark:text-green-300">
-              <CheckCircle size={18} />
-              <span>Profile updated successfully!</span>
-            </div>
-          )}
-
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* First Name */}
-            <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-2">
-                First Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <input
-                  type="text"
-                  id="firstName"
-                  name="firstName"
-                  value={formData.firstName}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Enter your first name"
-                />
+          <div className="flex flex-col sm:flex-row items-center gap-5">
+            <div className="relative group">
+              <div className="w-24 h-24 rounded-full bg-primary text-background flex items-center justify-center text-3xl font-bold shadow-lg">
+                {initials}
+              </div>
+              <div className="absolute inset-0 rounded-full bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-default">
+                <Camera size={22} className="text-white" />
               </div>
             </div>
+            <div className="text-center sm:text-left">
+              <h2 className="text-xl font-semibold text-foreground">
+                {displayName || 'Set up your name'}
+              </h2>
+              <p className="text-muted-foreground text-sm">{formData.email}</p>
+              {memberSince && (
+                <div className="flex items-center gap-1.5 mt-2 text-xs text-muted-foreground justify-center sm:justify-start">
+                  <Clock size={12} />
+                  <span>Member since {memberSince}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
 
-            {/* Last Name */}
-            <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-2">
-                Last Name
-              </label>
-              <div className="relative">
-                <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <input
-                  type="text"
-                  id="lastName"
-                  name="lastName"
-                  value={formData.lastName}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="Enter your last name"
-                />
-              </div>
+        {/* Error Banner */}
+        {error && (
+          <div className="p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-xl flex items-center space-x-2 text-red-700 dark:text-red-300">
+            <AlertCircle size={18} className="flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Personal Info Form */}
+        <form onSubmit={handleSubmit}>
+          <div className="bg-card border border-border rounded-2xl overflow-hidden">
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <User size={18} className="text-primary" />
+                Personal Information
+              </h3>
+              <p className="text-sm text-muted-foreground mt-0.5">
+                Changes are saved automatically when you leave a field
+              </p>
             </div>
 
-            {/* Email (Read-only) */}
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+            <div className="p-6 space-y-5">
+              {/* Name Row */}
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div>
+                  <label htmlFor="firstName" className="block text-sm font-medium text-foreground mb-1.5">
+                    First Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                    <input
+                      type="text"
+                      id="firstName"
+                      name="firstName"
+                      value={formData.firstName}
+                      onChange={handleInputChange}
+                      onBlur={() => handleBlur('firstName')}
+                      className={inputClasses}
+                      placeholder="First name"
+                    />
+                    {savedField === 'firstName' && (
+                      <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={18} />
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <label htmlFor="lastName" className="block text-sm font-medium text-foreground mb-1.5">
+                    Last Name
+                  </label>
+                  <div className="relative">
+                    <User className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                    <input
+                      type="text"
+                      id="lastName"
+                      name="lastName"
+                      value={formData.lastName}
+                      onChange={handleInputChange}
+                      onBlur={() => handleBlur('lastName')}
+                      className={inputClasses}
+                      placeholder="Last name"
+                    />
+                    {savedField === 'lastName' && (
+                      <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={18} />
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-1.5">
+                  Phone Number
+                </label>
+                <div className="relative">
+                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
+                  <input
+                    type="tel"
+                    id="phone"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    onBlur={() => handleBlur('phone')}
+                    className={inputClasses}
+                    placeholder="0712 345 678"
+                  />
+                  {savedField === 'phone' && (
+                    <CheckCircle className="absolute right-3 top-1/2 -translate-y-1/2 text-green-500" size={18} />
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Email Section */}
+          <div className="bg-card border border-border rounded-2xl overflow-hidden mt-6">
+            <div className="px-6 py-4 border-b border-border">
+              <h3 className="font-semibold text-foreground flex items-center gap-2">
+                <Shield size={18} className="text-primary" />
+                Account
+              </h3>
+            </div>
+
+            <div className="p-6">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-1.5">
                 Email Address
               </label>
               <div className="relative">
@@ -242,54 +335,39 @@ export default function ProfilePage() {
                   className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-muted text-muted-foreground cursor-not-allowed"
                 />
               </div>
-              <p className="mt-1 text-xs text-muted-foreground">
-                Email cannot be changed. Contact support if you need to update it.
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                Email is tied to your account and cannot be changed here.
               </p>
             </div>
+          </div>
 
-            {/* Phone */}
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-foreground mb-2">
-                Phone Number
-              </label>
-              <div className="relative">
-                <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" size={18} />
-                <input
-                  type="tel"
-                  id="phone"
-                  name="phone"
-                  value={formData.phone}
-                  onChange={handleInputChange}
-                  onBlur={handleBlur}
-                  className="w-full pl-10 pr-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-                  placeholder="0712 345 678"
-                />
-              </div>
+          {/* Actions */}
+          <div className="flex items-center justify-between pt-6">
+            <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+              {isSaving ? (
+                <>
+                  <Loader2 className="animate-spin" size={14} />
+                  <span>Saving...</span>
+                </>
+              ) : savedField === 'all' ? (
+                <>
+                  <CheckCircle className="text-green-500" size={14} />
+                  <span className="text-green-600 dark:text-green-400">All changes saved</span>
+                </>
+              ) : null}
             </div>
-
-            {/* Submit Button */}
-            <div className="flex items-center justify-end space-x-4 pt-4">
+            <div className="flex items-center gap-3">
               <Link href="/account">
-                <Button type="button" variant="outline">
-                  Cancel
+                <Button type="button" variant="ghost" size="sm">
+                  Back
                 </Button>
               </Link>
-              <Button type="submit" disabled={isSaving}>
-                {isSaving ? (
-                  <>
-                    <Loader2 className="animate-spin mr-2" size={18} />
-                    Saving...
-                  </>
-                ) : (
-                  <>
-                    <Save size={18} className="mr-2" />
-                    Save Changes
-                  </>
-                )}
+              <Button type="submit" size="sm" disabled={isSaving}>
+                Save All Changes
               </Button>
             </div>
-          </form>
-        </div>
+          </div>
+        </form>
       </div>
     </div>
   );
