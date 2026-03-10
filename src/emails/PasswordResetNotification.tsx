@@ -110,8 +110,8 @@ export default function PasswordResetNotification({ email }: PasswordResetNotifi
                 WhatsApp
               </Link>{' '}
               or email{' '}
-              <Link href="mailto:hello@peonyhq.co.ke" style={link}>
-                hello@peonyhq.co.ke
+              <Link href="mailto:peonyhqkenya@gmail.com" style={link}>
+                peonyhqkenya@gmail.com
               </Link>
             </Text>
             <Text style={footerText}>

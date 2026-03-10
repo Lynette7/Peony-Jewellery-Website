@@ -199,7 +199,13 @@ export async function createContactMessage(messageData: ContactMessageInsert) {
 
 export async function subscribeToNewsletter(subscriberData: NewsletterSubscriberInsert) {
   try {
-    const supabase = await createClient();
+    // Use service role client to bypass RLS — this server action is called by
+    // both authenticated and anonymous visitors.
+    const { createClient: createServiceClient } = await import('@supabase/supabase-js');
+    const supabase = createServiceClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    );
     
     // Check if email already exists
     const { data: existing } = await supabase
