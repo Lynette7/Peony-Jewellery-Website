@@ -177,11 +177,11 @@ export default function ProductDetail({ product }: ProductDetailProps) {
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-hidden">
         {/* Product Details */}
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12">
           {/* Image Section with Carousel */}
-          <div className="space-y-4">
+          <div className="min-w-0 space-y-4">
             {/* Main Image */}
             <div className="relative aspect-square rounded-2xl overflow-hidden bg-muted">
               <Image
@@ -261,13 +261,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
           </div>
 
           {/* Info Section */}
-          <div className="space-y-6">
+          <div className="min-w-0 space-y-6">
             {/* Category & Title */}
             <div>
               <p className="text-primary font-medium uppercase tracking-wider text-sm mb-2">
                 {product.category}
               </p>
-              <h1 className="text-3xl sm:text-4xl font-bold text-foreground mb-4">
+              <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-foreground mb-4 break-words">
                 {product.name}
               </h1>
               
@@ -378,13 +378,13 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                         key={index}
                         type="button"
                         onClick={() => handleVariantSelect(variant)}
-                        className={`flex items-center space-x-3 border-2 rounded-xl p-2 pr-4 transition-all ${
+                        className={`flex items-center space-x-2 sm:space-x-3 border-2 rounded-xl p-2 pr-3 sm:pr-4 transition-all max-w-full ${
                           isSelected
                             ? 'border-primary bg-primary/10 ring-1 ring-primary'
                             : 'border-border hover:border-primary'
                         }`}
                       >
-                        <div className="relative w-12 h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                        <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-lg overflow-hidden bg-muted flex-shrink-0">
                           <Image
                             src={variant.image}
                             alt={variant.name}
@@ -393,7 +393,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                             sizes="48px"
                           />
                         </div>
-                        <span className={`text-sm font-medium ${isSelected ? 'text-primary' : 'text-foreground'}`}>
+                        <span className={`text-sm font-medium truncate ${isSelected ? 'text-primary' : 'text-foreground'}`}>
                           {variant.name}
                         </span>
                         {isSelected && (

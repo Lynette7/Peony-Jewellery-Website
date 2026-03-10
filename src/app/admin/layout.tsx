@@ -57,7 +57,7 @@ export default function AdminLayout({
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push('/admin/login');
+    window.location.href = '/admin/login';
   };
 
   // Don't show sidebar on login page
