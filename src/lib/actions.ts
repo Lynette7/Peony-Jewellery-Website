@@ -3,11 +3,13 @@
 import { createClient } from '@/lib/supabase/server';
 import { OrderInsert, ContactMessageInsert, NewsletterSubscriberInsert, ReviewInsert, Review } from '@/types/database';
 import { sendEmail, ADMIN_EMAIL } from '@/lib/email';
+import { getUnsubscribeUrl } from '@/lib/newsletter';
 import React from 'react';
 import OrderConfirmation from '@/emails/OrderConfirmation';
 import AdminOrderNotification from '@/emails/AdminOrderNotification';
 import WelcomeEmail from '@/emails/WelcomeEmail';
 import NewsletterConfirmation from '@/emails/NewsletterConfirmation';
+import PasswordResetNotification from '@/emails/PasswordResetNotification';
 import ContactConfirmation from '@/emails/ContactConfirmation';
 import AdminContactNotification from '@/emails/AdminContactNotification';
 
@@ -226,7 +228,10 @@ export async function subscribeToNewsletter(subscriberData: NewsletterSubscriber
       void sendEmail({
         to: subscriberData.email,
         subject: `Welcome back to Peony HQ! You're re-subscribed 🌸`,
-        react: React.createElement(NewsletterConfirmation, { email: subscriberData.email }),
+        react: React.createElement(NewsletterConfirmation, {
+          email: subscriberData.email,
+          unsubscribeUrl: getUnsubscribeUrl(subscriberData.email),
+        }),
       });
 
       return { success: true, message: 'Subscription reactivated' };
@@ -248,13 +253,30 @@ export async function subscribeToNewsletter(subscriberData: NewsletterSubscriber
     void sendEmail({
       to: subscriberData.email,
       subject: `You're on the list! Welcome to Peony HQ 🌸`,
-      react: React.createElement(NewsletterConfirmation, { email: subscriberData.email }),
+      react: React.createElement(NewsletterConfirmation, {
+        email: subscriberData.email,
+        unsubscribeUrl: getUnsubscribeUrl(subscriberData.email),
+      }),
     });
 
     return { success: true, data };
   } catch (error) {
     console.error('Error subscribing to newsletter:', error);
     return { success: false, error: 'Failed to subscribe' };
+  }
+}
+
+export async function sendPasswordResetNotification(email: string) {
+  try {
+    await sendEmail({
+      to: email,
+      subject: 'Password Reset — Peony HQ Kenya',
+      react: React.createElement(PasswordResetNotification, { email }),
+    });
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending password reset notification:', error);
+    return { success: false, error: 'Failed to send notification' };
   }
 }
 

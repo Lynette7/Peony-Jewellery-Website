@@ -8,6 +8,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import Button from '@/components/ui/Button';
 import { createClient } from '@/lib/supabase/client';
+import { sendPasswordResetNotification } from '@/lib/actions';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -69,6 +70,8 @@ export default function LoginPage() {
       setError(resetError.message);
     } else {
       setResetSent(true);
+      // Also send a branded notification from hello@peonyhq.co.ke
+      void sendPasswordResetNotification(email);
     }
   };
 

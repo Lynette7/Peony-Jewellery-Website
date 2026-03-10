@@ -14,16 +14,15 @@ import {
 import * as React from 'react';
 import { SITE_URL, EMAIL_LOGO_URL } from '@/lib/email';
 
-interface NewsletterConfirmationProps {
+interface PasswordResetNotificationProps {
   email: string;
-  unsubscribeUrl?: string;
 }
 
-export default function NewsletterConfirmation({ email, unsubscribeUrl }: NewsletterConfirmationProps) {
+export default function PasswordResetNotification({ email }: PasswordResetNotificationProps) {
   return (
     <Html>
       <Head />
-      <Preview>You&apos;re on the list! Welcome to the Peony HQ inner circle 🌸</Preview>
+      <Preview>Password reset requested for your Peony HQ account</Preview>
       <Body style={body}>
         <Container style={container}>
           {/* Header */}
@@ -39,54 +38,82 @@ export default function NewsletterConfirmation({ email, unsubscribeUrl }: Newsle
 
           {/* Hero */}
           <Section style={heroSection}>
-            <Text style={pinkBadge}>You&apos;re in! 🌸</Text>
-            <Heading style={h1}>Welcome to the Peony Inner Circle</Heading>
+            <Text style={lockBadge}>🔒 Password Reset</Text>
+            <Heading style={h1}>Reset Your Password</Heading>
             <Text style={heroText}>
-              Hey there! Thanks for subscribing to the Peony HQ Kenya newsletter.
-              You&apos;re now the first to know about:
+              Hi there! We received a request to reset the password for the Peony HQ
+              account linked to <strong>{email}</strong>.
             </Text>
           </Section>
 
-          {/* Perks */}
+          <Hr style={divider} />
+
+          {/* Instructions */}
           <Section style={sectionPadding}>
-            <Section style={perkCard}>
-              <Text style={perkText}>✨ <strong>New arrivals</strong> — before anyone else sees them</Text>
+            <Heading style={h2}>Here&apos;s what to do next</Heading>
+
+            <Section style={stepCard}>
+              <Text style={stepText}>
+                <strong>1.</strong> Check your inbox for a separate email from our
+                authentication provider with the subject{' '}
+                <strong>&quot;Reset Your Password&quot;</strong>.
+              </Text>
             </Section>
-            <Section style={perkCard}>
-              <Text style={perkText}>🏷️ <strong>Exclusive deals</strong> — subscriber-only discounts and flash sales</Text>
+
+            <Section style={stepCard}>
+              <Text style={stepText}>
+                <strong>2.</strong> Click the <strong>reset link</strong> in that email.
+                It will take you to a page where you can set a new password.
+              </Text>
             </Section>
-            <Section style={perkCard}>
-              <Text style={perkText}>💌 <strong>Styling tips</strong> — how to style your pieces for any occasion</Text>
+
+            <Section style={stepCard}>
+              <Text style={stepText}>
+                <strong>3.</strong> Choose a strong password — at least 8 characters with
+                a mix of letters, numbers, and symbols.
+              </Text>
             </Section>
-            <Section style={perkCard}>
-              <Text style={perkText}>🎁 <strong>Giveaways</strong> — subscriber-exclusive contests</Text>
+          </Section>
+
+          {/* Warning */}
+          <Section style={warningWrapper}>
+            <Section style={warningBanner}>
+              <Text style={warningText}>
+                ⚠️ <strong>Can&apos;t find the reset email?</strong> Check your spam
+                or junk folder. The email may take a few minutes to arrive.
+              </Text>
             </Section>
           </Section>
 
           <Hr style={divider} />
 
+          {/* Didn't request */}
+          <Section style={sectionPadding}>
+            <Text style={mutedText}>
+              If you didn&apos;t request a password reset, you can safely ignore both
+              emails — your password will remain unchanged and your account is secure.
+            </Text>
+          </Section>
+
           {/* CTA */}
-          <Section style={{ ...sectionPadding, textAlign: 'center' }}>
-            <Text style={ctaLabel}>Ready to explore?</Text>
-            <Link href={`${SITE_URL}/shop`} style={ctaButton}>
-              Shop the Collection
+          <Section style={{ ...sectionPadding, textAlign: 'center', paddingTop: '0' }}>
+            <Link href={`${SITE_URL}/account/login`} style={ctaButton}>
+              Go to Login
             </Link>
           </Section>
 
           {/* Footer */}
           <Section style={footerSection}>
             <Text style={footerText}>
-              You&apos;re receiving this because{' '}
-              <strong>{email}</strong> subscribed at peonyhq.co.ke.
+              Questions? Chat with us on{' '}
+              <Link href="https://wa.me/+254111887020" style={link}>
+                WhatsApp
+              </Link>{' '}
+              or email{' '}
+              <Link href="mailto:hello@peonyhq.co.ke" style={link}>
+                hello@peonyhq.co.ke
+              </Link>
             </Text>
-            {unsubscribeUrl && (
-              <Text style={footerText}>
-                <Link href={unsubscribeUrl} style={link}>
-                  Unsubscribe
-                </Link>{' '}
-                from future emails.
-              </Text>
-            )}
             <Text style={footerText}>
               © {new Date().getFullYear()} Peony HQ Kenya ·{' '}
               <Link href={SITE_URL} style={link}>
@@ -127,10 +154,10 @@ const heroSection: React.CSSProperties = {
   textAlign: 'center',
 };
 
-const pinkBadge: React.CSSProperties = {
+const lockBadge: React.CSSProperties = {
   display: 'inline-block',
-  backgroundColor: '#f8dae2',
-  color: '#82001a',
+  backgroundColor: '#fff8e1',
+  color: '#5d4037',
   fontSize: '13px',
   fontWeight: '700',
   padding: '4px 14px',
@@ -146,6 +173,13 @@ const h1: React.CSSProperties = {
   margin: '0 0 12px',
 };
 
+const h2: React.CSSProperties = {
+  color: '#000',
+  fontSize: '18px',
+  fontWeight: '700',
+  margin: '0 0 16px',
+};
+
 const heroText: React.CSSProperties = {
   color: '#444',
   fontSize: '15px',
@@ -154,7 +188,7 @@ const heroText: React.CSSProperties = {
 };
 
 const sectionPadding: React.CSSProperties = {
-  padding: '16px 32px 24px',
+  padding: '24px 32px',
 };
 
 const divider: React.CSSProperties = {
@@ -162,25 +196,45 @@ const divider: React.CSSProperties = {
   margin: '0',
 };
 
-const perkCard: React.CSSProperties = {
+const stepCard: React.CSSProperties = {
   backgroundColor: '#fcfbf9',
-  border: '1px solid #f8dae2',
+  border: '1px solid #e5e5e5',
   borderRadius: '8px',
   padding: '12px 16px',
   marginBottom: '10px',
 };
 
-const perkText: React.CSSProperties = {
+const stepText: React.CSSProperties = {
   color: '#444',
   fontSize: '14px',
-  lineHeight: '1.5',
+  lineHeight: '1.6',
   margin: '0',
 };
 
-const ctaLabel: React.CSSProperties = {
-  color: '#666',
+const warningWrapper: React.CSSProperties = {
+  padding: '0 32px 8px',
+};
+
+const warningBanner: React.CSSProperties = {
+  backgroundColor: '#fff8e1',
+  border: '1px solid #ffe082',
+  borderRadius: '8px',
+  padding: '16px 20px',
+};
+
+const warningText: React.CSSProperties = {
+  color: '#5d4037',
   fontSize: '14px',
-  margin: '0 0 12px',
+  lineHeight: '1.6',
+  margin: '0',
+};
+
+const mutedText: React.CSSProperties = {
+  color: '#888',
+  fontSize: '13px',
+  lineHeight: '1.6',
+  margin: '0',
+  textAlign: 'center',
 };
 
 const ctaButton: React.CSSProperties = {
