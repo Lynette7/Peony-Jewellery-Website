@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Mail, Lock, AlertCircle, Loader2 } from 'lucide-react';
+import { Mail, Lock, AlertCircle, Loader2, CheckCircle } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAdminMode } from '@/contexts/AdminModeContext';
 import Button from '@/components/ui/Button';
@@ -19,6 +19,8 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [resetSent, setResetSent] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const userId = user?.id;
 
@@ -52,6 +54,24 @@ export default function LoginPage() {
     // On success: AuthContext sets user → useEffect above fires → handles redirect
   };
 
+  const handleForgotPassword = async () => {
+    if (!email) {
+      setError('Please enter your email address first.');
+      return;
+    }
+    setError('');
+    setResetLoading(true);
+    const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/account/login`,
+    });
+    setResetLoading(false);
+    if (resetError) {
+      setError(resetError.message);
+    } else {
+      setResetSent(true);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
@@ -67,6 +87,15 @@ export default function LoginPage() {
             <div className="mb-6 p-4 bg-red-50 dark:bg-red-900/30 border border-red-200 dark:border-red-700 rounded-lg flex items-start space-x-3">
               <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
               <p className="text-red-700 dark:text-red-300 text-sm">{error}</p>
+            </div>
+          )}
+
+          {resetSent && (
+            <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-700 rounded-lg flex items-start space-x-3">
+              <CheckCircle className="text-green-500 flex-shrink-0 mt-0.5" size={20} />
+              <p className="text-green-700 dark:text-green-300 text-sm">
+                Password reset link sent! Check your email inbox.
+              </p>
             </div>
           )}
 
@@ -109,6 +138,17 @@ export default function LoginPage() {
               </div>
             </div>
 
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleForgotPassword}
+                disabled={resetLoading}
+                className="text-sm text-primary hover:underline font-medium disabled:opacity-50"
+              >
+                {resetLoading ? 'Sending...' : 'Forgot password?'}
+              </button>
+            </div>
+
             <Button
               type="submit"
               fullWidth
@@ -133,18 +173,6 @@ export default function LoginPage() {
                 Sign up
               </Link>
             </p>
-            
-            <div className="pt-4 border-t border-border">
-              <p className="text-xs text-muted-foreground mb-2">
-                Are you an admin?
-              </p>
-              <Link
-                href="/admin/login"
-                className="text-sm text-primary hover:underline font-medium"
-              >
-                Admin Login →
-              </Link>
-            </div>
             
             <Link
               href="/"
