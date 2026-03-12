@@ -55,7 +55,7 @@ export default function PasswordResetNotification({ email }: PasswordResetNotifi
             <Section style={stepCard}>
               <Text style={stepText}>
                 <strong>1.</strong> Check your inbox for a separate email from our
-                authentication provider with the subject{' '}
+                authentication provider, <strong>Supabase Auth</strong>, with the subject{' '}
                 <strong>&quot;Reset Your Password&quot;</strong>.
               </Text>
             </Section>
