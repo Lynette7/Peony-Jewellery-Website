@@ -79,7 +79,7 @@ export default function ProductCard({ product }: ProductCardProps) {
           )}
 
           {/* Quick Actions */}
-          <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className="absolute top-3 right-3 flex flex-col space-y-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none sm:pointer-events-auto">
             <button
               onClick={handleToggleWishlist}
               className={`p-2 rounded-full shadow-md transition-all duration-200 ${
@@ -102,7 +102,7 @@ export default function ProductCard({ product }: ProductCardProps) {
 
           {/* Add to Cart Button - Appears on Hover */}
           {product.inStock && (
-            <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0">
+            <div className="absolute bottom-0 left-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform translate-y-2 group-hover:translate-y-0 pointer-events-none sm:pointer-events-auto">
               <button
                 onClick={handleAddToCart}
                 className={`w-full py-3 rounded-full font-medium flex items-center justify-center space-x-2 transition-all duration-200 ${
