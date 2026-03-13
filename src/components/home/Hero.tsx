@@ -59,16 +59,16 @@ export default function Hero() {
             {/* Stats */}
             <div className="flex justify-center lg:justify-start gap-8 pt-4">
               <div className="text-center">
-                <p className="text-3xl font-bold text-primary">500+</p>
-                <p className="text-muted-foreground text-sm">Happy Customers</p>
+                <p className="text-3xl font-bold text-primary">5★</p>
+                <p className="text-muted-foreground text-sm">Customer Rated</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-primary">100+</p>
-                <p className="text-muted-foreground text-sm">Unique Pieces</p>
+                <p className="text-3xl font-bold text-primary">5</p>
+                <p className="text-muted-foreground text-sm">Categories</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-primary">4.9</p>
-                <p className="text-muted-foreground text-sm">Star Rating</p>
+                <p className="text-3xl font-bold text-primary">KE</p>
+                <p className="text-muted-foreground text-sm">Locally Curated</p>
               </div>
             </div>
           </div>

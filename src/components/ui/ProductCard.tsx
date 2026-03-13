@@ -57,18 +57,23 @@ export default function ProductCard({ product }: ProductCardProps) {
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
           />
           
-          {/* Out of Stock Overlay */}
+          {/* Out of Stock Badge */}
           {!product.inStock && (
-            <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-              <span className="bg-foreground text-background px-4 py-2 rounded-full text-sm font-medium">
-                Out of Stock
-              </span>
-            </div>
+            <span className="absolute top-3 left-3 bg-red-600 text-white px-3 py-1.5 rounded-md text-[11px] font-semibold uppercase tracking-wider shadow-lg z-10">
+              Sold Out
+            </span>
           )}
 
           {/* Featured Badge */}
           {product.featured && product.inStock && (
             <span className="absolute top-3 left-3 bg-primary text-background px-3 py-1 rounded-full text-xs font-medium">
+              Featured
+            </span>
+          )}
+
+          {/* Featured Badge (when also out of stock, shift down) */}
+          {product.featured && !product.inStock && (
+            <span className="absolute top-11 left-3 bg-primary text-background px-3 py-1 rounded-full text-xs font-medium z-10">
               Featured
             </span>
           )}

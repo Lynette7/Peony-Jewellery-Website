@@ -61,7 +61,7 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="font-semibold text-foreground">Customer Love</h3>
-              <p className="text-sm text-muted-foreground">500+ happy customers</p>
+              <p className="text-sm text-muted-foreground">5-star rated by customers</p>
             </div>
           </div>
         </div>

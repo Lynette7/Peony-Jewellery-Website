@@ -192,15 +192,21 @@ export default function ProductDetail({ product }: ProductDetailProps) {
                 sizes="(max-width: 1024px) 100vw, 50vw"
                 priority
               />
+              {/* Out of Stock Badge */}
               {!product.inStock && (
-                <div className="absolute inset-0 bg-background/60 flex items-center justify-center">
-                  <span className="bg-foreground text-background px-6 py-3 rounded-full font-medium">
-                    Out of Stock
-                  </span>
-                </div>
+                <span className="absolute top-4 left-4 bg-red-600 text-white px-4 py-2 rounded-md text-sm font-semibold uppercase tracking-wider shadow-lg z-10">
+                  Sold Out
+                </span>
               )}
+              {/* Featured Badge */}
               {product.featured && product.inStock && (
                 <span className="absolute top-4 left-4 bg-primary text-background px-4 py-2 rounded-full text-sm font-medium">
+                  Featured
+                </span>
+              )}
+              {/* Featured Badge (when also out of stock, shift down) */}
+              {product.featured && !product.inStock && (
+                <span className="absolute top-14 left-4 bg-primary text-background px-4 py-2 rounded-full text-sm font-medium z-10">
                   Featured
                 </span>
               )}
@@ -673,7 +679,7 @@ export default function ProductDetail({ product }: ProductDetailProps) {
             <h2 className="text-2xl font-bold text-foreground mb-8">
               You May Also Like
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
               {relatedProducts.map((p) => (
                 <ProductCard key={p.id} product={p} />
               ))}
