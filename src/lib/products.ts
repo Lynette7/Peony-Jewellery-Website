@@ -86,31 +86,53 @@ export async function searchProducts(query: string): Promise<Product[]> {
   const trimmed = query.trim();
   if (!trimmed) return [];
 
+  const lower = trimmed.toLowerCase();
+  const allCategories: string[] = ['earrings', 'necklaces', 'rings', 'bracelets', 'sets'];
+  const matchedCategory = allCategories.find(c => c === lower);
+
   try {
     const supabase = await createClient();
+
+    if (matchedCategory) {
+      // Exact category match — return only that category
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category', matchedCategory)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        console.error('Error searching products:', error);
+        return staticProducts.filter(p => p.category === matchedCategory);
+      }
+      return (data || []).map(mapSupabaseProduct);
+    }
+
+    // General search — match name or description only (not category, to avoid substring issues)
     const pattern = `%${trimmed}%`;
     const { data, error } = await supabase
       .from('products')
       .select('*')
-      .or(`name.ilike.${pattern},description.ilike.${pattern},category.ilike.${pattern}`)
+      .or(`name.ilike.${pattern},description.ilike.${pattern}`)
       .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error searching products:', error);
       return staticProducts.filter(p =>
-        p.name.toLowerCase().includes(trimmed.toLowerCase()) ||
-        p.description.toLowerCase().includes(trimmed.toLowerCase()) ||
-        p.category.toLowerCase().includes(trimmed.toLowerCase())
+        p.name.toLowerCase().includes(lower) ||
+        p.description.toLowerCase().includes(lower)
       );
     }
 
     return (data || []).map(mapSupabaseProduct);
   } catch (error) {
     console.error('Error searching products:', error);
+    if (matchedCategory) {
+      return staticProducts.filter(p => p.category === matchedCategory);
+    }
     return staticProducts.filter(p =>
-      p.name.toLowerCase().includes(trimmed.toLowerCase()) ||
-      p.description.toLowerCase().includes(trimmed.toLowerCase()) ||
-      p.category.toLowerCase().includes(trimmed.toLowerCase())
+      p.name.toLowerCase().includes(lower) ||
+      p.description.toLowerCase().includes(lower)
     );
   }
 }
