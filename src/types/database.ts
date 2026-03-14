@@ -69,6 +69,7 @@ export type Database = {
           total: number;
           items: Json;
           payment_method: 'mpesa' | 'card';
+          paystack_reference: string | null;
           user_id: string | null;
           created_at: string;
         };
@@ -84,6 +85,7 @@ export type Database = {
           total: number;
           items: Json;
           payment_method: 'mpesa' | 'card';
+          paystack_reference?: string | null;
           user_id?: string | null;
           created_at?: string;
         };
@@ -99,6 +101,7 @@ export type Database = {
           total?: number;
           items?: Json;
           payment_method?: 'mpesa' | 'card';
+          paystack_reference?: string | null;
           user_id?: string | null;
           created_at?: string;
         };
