@@ -1,189 +1,106 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Loader2, CreditCard, ArrowLeft, Lock } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { Smartphone, ArrowLeft, Lock } from 'lucide-react';
 import { formatPrice } from '@/data/products';
 import Button from '@/components/ui/Button';
 
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    PaystackPop: any;
+  }
+}
+
 interface CardPaymentProps {
   amount: number;
-  onSuccess: () => void;
+  email: string;
+  name: string;
+  phone: string;
+  onSuccess: (reference: string) => void;
   onBack: () => void;
 }
 
-export default function CardPayment({ amount, onSuccess, onBack }: CardPaymentProps) {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [cardData, setCardData] = useState({
-    number: '',
-    expiry: '',
-    cvc: '',
-    name: '',
-  });
+export default function CardPayment({ amount, email, name, phone, onSuccess, onBack }: CardPaymentProps) {
+  const scriptLoaded = useRef(false);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    if (name === 'number') {
-      // Format card number with spaces
-      const formatted = value.replace(/\D/g, '').replace(/(\d{4})/g, '$1 ').trim();
-      setCardData((prev) => ({ ...prev, [name]: formatted.slice(0, 19) }));
-    } else if (name === 'expiry') {
-      // Format expiry as MM/YY
-      const digits = value.replace(/\D/g, '');
-      if (digits.length >= 2) {
-        setCardData((prev) => ({ ...prev, [name]: `${digits.slice(0, 2)}/${digits.slice(2, 4)}` }));
-      } else {
-        setCardData((prev) => ({ ...prev, [name]: digits }));
-      }
-    } else if (name === 'cvc') {
-      setCardData((prev) => ({ ...prev, [name]: value.replace(/\D/g, '').slice(0, 4) }));
-    } else {
-      setCardData((prev) => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    if (scriptLoaded.current || document.getElementById('paystack-script')) return;
+    const script = document.createElement('script');
+    script.id = 'paystack-script';
+    script.src = 'https://js.paystack.co/v1/inline.js';
+    script.async = true;
+    script.onload = () => { scriptLoaded.current = true; };
+    document.body.appendChild(script);
+  }, []);
+
+  const handlePay = () => {
+    if (!window.PaystackPop) {
+      alert('Payment is still loading. Please try again in a moment.');
+      return;
     }
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsProcessing(true);
+    const handler = window.PaystackPop.setup({
+      key: process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY!,
+      email,
+      amount: amount * 100, // Paystack uses kobo/cents
+      currency: 'KES',
+      channels: ['mobile_money'],
+      ref: `peony_${Date.now()}`,
+      metadata: {
+        custom_fields: [
+          { display_name: 'Customer Name', variable_name: 'customer_name', value: name },
+          { display_name: 'Phone', variable_name: 'phone', value: phone },
+        ],
+      },
+      callback: (response: { reference: string }) => {
+        onSuccess(response.reference);
+      },
+      onClose: () => {
+        // User closed the payment popup — do nothing
+      },
+    });
 
-    // Simulate card payment processing
-    // In production, this would integrate with Stripe, Paystack, or another payment provider
-    await new Promise((resolve) => setTimeout(resolve, 2500));
-
-    setIsProcessing(false);
-    onSuccess();
+    handler.openIframe();
   };
 
   return (
     <div className="bg-card border border-border rounded-2xl p-6">
       <div className="flex items-center space-x-3 mb-6">
-        <div className="w-12 h-12 bg-blue-500 rounded-xl flex items-center justify-center">
-          <CreditCard className="text-white" size={24} />
+        <div className="w-12 h-12 bg-green-600 rounded-xl flex items-center justify-center">
+          <Smartphone className="text-white" size={24} />
         </div>
         <div>
-          <h3 className="text-lg font-semibold text-foreground">Card Payment</h3>
-          <p className="text-sm text-muted-foreground">Secure payment with Visa, Mastercard, or Amex</p>
+          <h3 className="text-lg font-semibold text-foreground">M-Pesa</h3>
+          <p className="text-sm text-muted-foreground">Pay securely via M-Pesa</p>
         </div>
       </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label htmlFor="name" className="block text-sm font-medium text-foreground mb-2">
-            Cardholder Name *
-          </label>
-          <input
-            type="text"
-            id="name"
-            name="name"
-            value={cardData.name}
-            onChange={handleInputChange}
-            placeholder="John Doe"
-            required
-            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
+      <div className="bg-muted/50 rounded-xl p-4 mb-6">
+        <div className="flex justify-between font-semibold">
+          <span className="text-foreground">Total to Pay</span>
+          <span className="text-primary">{formatPrice(amount)}</span>
         </div>
+      </div>
 
-        <div>
-          <label htmlFor="number" className="block text-sm font-medium text-foreground mb-2">
-            Card Number *
-          </label>
-          <input
-            type="text"
-            id="number"
-            name="number"
-            value={cardData.number}
-            onChange={handleInputChange}
-            placeholder="4242 4242 4242 4242"
-            required
-            className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-          />
-        </div>
+      <div className="flex items-center space-x-2 text-xs text-muted-foreground mb-6">
+        <Lock size={14} />
+        <span>Your M-Pesa payment is processed securely by Paystack</span>
+      </div>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label htmlFor="expiry" className="block text-sm font-medium text-foreground mb-2">
-              Expiry Date *
-            </label>
-            <input
-              type="text"
-              id="expiry"
-              name="expiry"
-              value={cardData.expiry}
-              onChange={handleInputChange}
-              placeholder="MM/YY"
-              required
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-          <div>
-            <label htmlFor="cvc" className="block text-sm font-medium text-foreground mb-2">
-              CVC *
-            </label>
-            <input
-              type="text"
-              id="cvc"
-              name="cvc"
-              value={cardData.cvc}
-              onChange={handleInputChange}
-              placeholder="123"
-              required
-              className="w-full px-4 py-3 rounded-xl border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-            />
-          </div>
-        </div>
-
-        <div className="bg-muted/50 rounded-xl p-4">
-          <div className="flex justify-between mb-2">
-            <span className="text-muted-foreground">Order Amount</span>
-            <span className="text-foreground">{formatPrice(amount)}</span>
-          </div>
-          <div className="flex justify-between mb-2">
-            <span className="text-muted-foreground">Shipping</span>
-            <span className="text-foreground">KES 300</span>
-          </div>
-          <div className="flex justify-between pt-2 border-t border-border">
-            <span className="font-semibold text-foreground">Total to Pay</span>
-            <span className="font-bold text-primary">{formatPrice(amount + 300)}</span>
-          </div>
-        </div>
-
-        <div className="flex items-center space-x-2 text-xs text-muted-foreground">
-          <Lock size={14} />
-          <span>Your payment information is encrypted and secure</span>
-        </div>
-
-        <div className="flex flex-col sm:flex-row gap-4 pt-2">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={onBack}
-            className="flex items-center justify-center space-x-2"
-          >
-            <ArrowLeft size={18} />
-            <span>Back</span>
-          </Button>
-          <Button
-            type="submit"
-            fullWidth
-            disabled={isProcessing}
-          >
-            {isProcessing ? (
-              <>
-                <Loader2 className="animate-spin mr-2" size={18} />
-                Processing...
-              </>
-            ) : (
-              `Pay ${formatPrice(amount + 300)}`
-            )}
-          </Button>
-        </div>
-      </form>
-
-      {/* Test Card Info */}
-      <div className="mt-6 p-4 bg-muted/30 rounded-xl border border-dashed border-border">
-        <p className="text-xs text-muted-foreground text-center">
-          <strong>Demo Mode:</strong> Use card number 4242 4242 4242 4242 with any future expiry and CVC
-        </p>
+      <div className="flex flex-col sm:flex-row gap-4">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onBack}
+          className="flex items-center justify-center space-x-2"
+        >
+          <ArrowLeft size={18} />
+          <span>Back</span>
+        </Button>
+        <Button type="button" fullWidth onClick={handlePay}>
+          Pay {formatPrice(amount)} via M-Pesa
+        </Button>
       </div>
     </div>
   );

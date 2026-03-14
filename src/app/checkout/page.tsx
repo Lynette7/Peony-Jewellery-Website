@@ -10,7 +10,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { createClient } from '@/lib/supabase/client';
 import { formatPrice } from '@/data/products';
 import Button from '@/components/ui/Button';
-import MpesaPayment from '@/components/checkout/MpesaPayment';
 import CardPayment from '@/components/checkout/CardPayment';
 import { createOrder } from '@/lib/actions';
 import CityDropdown from '@/components/ui/CityDropdown';
@@ -92,7 +91,7 @@ export default function CheckoutPage() {
     setStep('payment');
   };
 
-  const handlePaymentSuccess = async (mpesaCode?: string) => {
+  const handlePaymentSuccess = async (mpesaCode?: string, paystackReference?: string) => {
     setOrderError('');
 
     const orderItems = items.map((item) => ({
@@ -117,6 +116,7 @@ export default function CheckoutPage() {
         total: getCartTotal() + (shippingFee ?? 0),
         items: orderItems,
         payment_method: paymentMethod,
+        paystack_reference: paystackReference || null,
       },
       mpesaCode,
       shippingFee ?? 0,
@@ -409,9 +409,25 @@ export default function CheckoutPage() {
                     {orderError}
                   </div>
                 )}
-                <MpesaPayment
+
+                <CardPayment
                   amount={orderTotal}
-                  onSuccess={handlePaymentSuccess}
+                  email={formData.email}
+                  name={`${formData.firstName} ${formData.lastName}`}
+                  phone={formData.phone}
+                  onSuccess={async (reference) => {
+                    const res = await fetch('/api/paystack/verify', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ reference }),
+                    });
+                    const data = await res.json();
+                    if (!data.success) {
+                      setOrderError('Payment could not be verified. Please contact support.');
+                      return;
+                    }
+                    await handlePaymentSuccess(undefined, reference);
+                  }}
                   onBack={() => setStep('info')}
                 />
               </div>
@@ -433,7 +449,7 @@ export default function CheckoutPage() {
 
                   return (
                     <div key={itemKey} className="flex items-center space-x-3">
-                      <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+                      <div className="relative w-16 h-16 rounded-lg overflow-hidden bg-muted shrink-0">
                         <Image
                           src={displayImage}
                           alt={
