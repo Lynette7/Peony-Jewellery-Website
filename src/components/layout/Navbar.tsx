@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRouter } from 'next/navigation';
 import { ShoppingCart, Heart, Menu, X, Search, Sun, Moon, User, LogOut } from 'lucide-react';
 import { useCart } from '@/contexts/CartContext';
 import { useWishlist } from '@/contexts/WishlistContext';
@@ -10,9 +11,13 @@ import { useTheme } from '@/contexts/ThemeContext';
 import { useAuth } from '@/contexts/AuthContext';
 
 export default function Navbar() {
+  const router = useRouter();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchInputRef = React.useRef<HTMLInputElement>(null);
   const { getCartCount } = useCart();
   const { getWishlistCount } = useWishlist();
   const { resolvedTheme, toggleTheme } = useTheme();
@@ -30,6 +35,24 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  // Focus search input when opened
+  useEffect(() => {
+    if (isSearchOpen && searchInputRef.current) {
+      searchInputRef.current.focus();
+    }
+  }, [isSearchOpen]);
+
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const trimmed = searchQuery.trim();
+    if (trimmed) {
+      router.push(`/search?q=${encodeURIComponent(trimmed)}`);
+      setIsSearchOpen(false);
+      setSearchQuery('');
+      setIsMenuOpen(false);
+    }
+  };
 
   const navLinks = [
     { href: '/', label: 'Home' },
@@ -89,9 +112,10 @@ export default function Navbar() {
               </button>
             )}
 
-            {/* Search - hidden on mobile */}
+            {/* Search */}
             <button
-              className="hidden sm:flex p-2 text-foreground hover:text-primary transition-colors"
+              onClick={() => setIsSearchOpen(!isSearchOpen)}
+              className="p-2 text-foreground hover:text-primary transition-colors"
               aria-label="Search"
             >
               <Search size={22} />
@@ -195,6 +219,41 @@ export default function Navbar() {
           </div>
         </div>
       </div>
+
+      {/* Search Bar Overlay */}
+      {isSearchOpen && (
+        <div className="absolute top-full left-0 right-0 bg-background border-b border-border shadow-lg z-50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <form onSubmit={handleSearchSubmit} className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <Search size={20} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search for jewellery..."
+                  className="w-full pl-12 pr-4 py-3 bg-muted rounded-full text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+              </div>
+              <button
+                type="submit"
+                className="px-6 py-3 bg-primary text-background rounded-full font-medium hover:opacity-90 transition-opacity"
+              >
+                Search
+              </button>
+              <button
+                type="button"
+                onClick={() => { setIsSearchOpen(false); setSearchQuery(''); }}
+                className="p-2 text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Close search"
+              >
+                <X size={22} />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Mobile Navigation */}
       {isMenuOpen && (

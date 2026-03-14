@@ -81,6 +81,40 @@ export async function getProductById(id: string): Promise<Product | null> {
   }
 }
 
+// Search products by query (matches name, description, or category)
+export async function searchProducts(query: string): Promise<Product[]> {
+  const trimmed = query.trim();
+  if (!trimmed) return [];
+
+  try {
+    const supabase = await createClient();
+    const pattern = `%${trimmed}%`;
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .or(`name.ilike.${pattern},description.ilike.${pattern},category.ilike.${pattern}`)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error searching products:', error);
+      return staticProducts.filter(p =>
+        p.name.toLowerCase().includes(trimmed.toLowerCase()) ||
+        p.description.toLowerCase().includes(trimmed.toLowerCase()) ||
+        p.category.toLowerCase().includes(trimmed.toLowerCase())
+      );
+    }
+
+    return (data || []).map(mapSupabaseProduct);
+  } catch (error) {
+    console.error('Error searching products:', error);
+    return staticProducts.filter(p =>
+      p.name.toLowerCase().includes(trimmed.toLowerCase()) ||
+      p.description.toLowerCase().includes(trimmed.toLowerCase()) ||
+      p.category.toLowerCase().includes(trimmed.toLowerCase())
+    );
+  }
+}
+
 // Fetch featured products (products marked as featured and in stock)
 export async function getFeaturedProducts(): Promise<Product[]> {
   try {
